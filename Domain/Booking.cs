@@ -21,4 +21,14 @@ public sealed class Booking
     public DateTimeOffset? CancelledAt { get; set; }
 
     public string? Note { get; set; }
+
+    public DateTime GetStartDateTime()
+    {
+        return LessonDate.ToDateTime(StartTime);
+    }
+
+    public DateTime GetEndDateTime()
+    {
+        return GetStartDateTime().AddMinutes(DurationMinutes);
+    }
 }
