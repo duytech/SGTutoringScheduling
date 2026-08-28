@@ -53,7 +53,7 @@ public sealed class BookingValidationService
         {
             response.Errors.Add(CreateError(
                 code: ValidationErrorCodes.StudentOverlap,
-                message: $"Student '{request.StudentName}' already has another booking overlapping this time.",
+                message: $"Student '{request.StudentName}' already has a booking that overlaps {request.LessonDate:yyyy-MM-dd} {request.StartTime:HH\\:mm}.",
                 relatedBookingIds: studentOverlapIds));
         }
 
@@ -66,7 +66,7 @@ public sealed class BookingValidationService
         {
             response.Errors.Add(CreateError(
                 code: ValidationErrorCodes.TutorOverlap,
-                message: $"Tutor '{request.TutorId}' already has another booking overlapping this time.",
+                message: $"Tutor '{request.TutorId}' already has a booking that overlaps {request.LessonDate:yyyy-MM-dd} {request.StartTime:HH\\:mm}.",
                 relatedBookingIds: tutorOverlapIds));
         }
 
@@ -79,20 +79,22 @@ public sealed class BookingValidationService
         {
             response.Errors.Add(CreateError(
                 code: ValidationErrorCodes.RoomOverlap,
-                message: $"Room '{request.Room}' is already occupied during this time.",
+                message: $"Room '{request.Room}' is already occupied at {request.LessonDate:yyyy-MM-dd} {request.StartTime:HH\\:mm}.",
                 relatedBookingIds: roomOverlapIds));
         }
 
-        var tutorBookingCountForDay = bookings
+        var tutorBookingsForDay = bookings
             .Where(booking => booking.Status != BookingStatus.Cancelled)
             .Where(booking => booking.LessonDate == request.LessonDate)
-            .Count(booking => booking.TutorId == request.TutorId);
+            .Where(booking => booking.TutorId == request.TutorId)
+            .ToList();
 
-        if (tutorBookingCountForDay >= BookingLimits.MaxBookingsPerTutorPerDay)
+        if (tutorBookingsForDay.Count >= BookingLimits.MaxBookingsPerTutorPerDay)
         {
             response.Errors.Add(CreateError(
                 code: ValidationErrorCodes.TutorDailyLimitExceeded,
-                message: $"Tutor '{request.TutorId}' cannot exceed {BookingLimits.MaxBookingsPerTutorPerDay} bookings on {request.LessonDate:yyyy-MM-dd}."));
+                message: $"Tutor '{request.TutorId}' already has {tutorBookingsForDay.Count} bookings on {request.LessonDate:yyyy-MM-dd}, so this request would exceed the daily limit of {BookingLimits.MaxBookingsPerTutorPerDay}.",
+                relatedBookingIds: tutorBookingsForDay.Select(booking => booking.Id).ToList()));
         }
 
         response.Valid = response.Errors.Count == 0;
