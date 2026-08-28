@@ -33,8 +33,11 @@
 ## 4. Features I can see this tool needing
 
 - A "today" schedule board that can be understood at a glance.
+- Conflict detection for student, tutor, and room overlaps.
+- Clear visibility of changes made after the daily cut-off.
 - A cancellation workflow that distinguishes cancelled from no-show.
 - Booking change (move/reschedule) history.
+- Tutor load warnings and enforcement.
 
 
 ## 5. The one feature I chose
