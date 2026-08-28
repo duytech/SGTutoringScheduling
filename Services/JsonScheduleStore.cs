@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using SynergieGlobalTutoringScheduling.Domain;
 
 namespace SynergieGlobalTutoringScheduling.Services;
@@ -7,7 +8,11 @@ public sealed class JsonScheduleStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        Converters =
+        {
+            new JsonStringEnumConverter()
+        }
     };
 
     private readonly string _dataDirectoryPath;
