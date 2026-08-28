@@ -1,4 +1,5 @@
 using SynergieGlobalTutoringScheduling.Contracts;
+using SynergieGlobalTutoringScheduling.Domain;
 
 namespace SynergieGlobalTutoringScheduling.Services;
 
@@ -18,17 +19,17 @@ public sealed class BookingValidationService
         var response = new ValidateBookingResponse();
         var tutors = await _scheduleStore.LoadTutorsAsync(cancellationToken);
 
-        if (request.DurationMinutes is not 60 and not 90)
+        if (!BookingDurations.IsAllowed(request.DurationMinutes))
         {
             response.Errors.Add(CreateError(
-                code: "INVALID_DURATION",
-                message: "Duration must be either 60 or 90 minutes."));
+                code: ValidationErrorCodes.InvalidDuration,
+                message: $"Duration must be either {BookingDurations.SixtyMinutes} or {BookingDurations.NinetyMinutes} minutes."));
         }
 
         if (request.LessonDate.DayOfWeek == DayOfWeek.Monday)
         {
             response.Errors.Add(CreateError(
-                code: "CENTRE_CLOSED_MONDAY",
+                code: ValidationErrorCodes.CentreClosedMonday,
                 message: "The centre does not accept new bookings on Monday."));
         }
 
@@ -36,7 +37,7 @@ public sealed class BookingValidationService
         if (!tutorExists)
         {
             response.Errors.Add(CreateError(
-                code: "TUTOR_NOT_FOUND",
+                code: ValidationErrorCodes.TutorNotFound,
                 message: $"Tutor '{request.TutorId}' does not exist."));
         }
 
@@ -50,7 +51,7 @@ public sealed class BookingValidationService
         {
             Code = code,
             Message = message,
-            Severity = "error"
+            Severity = ValidationIssueSeverities.Error
         };
     }
 }
