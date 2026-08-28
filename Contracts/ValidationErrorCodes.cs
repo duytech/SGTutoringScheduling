@@ -8,4 +8,5 @@ public static class ValidationErrorCodes
     public const string StudentOverlap = "STUDENT_OVERLAP";
     public const string TutorOverlap = "TUTOR_OVERLAP";
     public const string RoomOverlap = "ROOM_OVERLAP";
+    public const string TutorDailyLimitExceeded = "TUTOR_DAILY_LIMIT_EXCEEDED";
 }

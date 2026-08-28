@@ -83,6 +83,18 @@ public sealed class BookingValidationService
                 relatedBookingIds: roomOverlapIds));
         }
 
+        var tutorBookingCountForDay = bookings
+            .Where(booking => booking.Status != BookingStatus.Cancelled)
+            .Where(booking => booking.LessonDate == request.LessonDate)
+            .Count(booking => booking.TutorId == request.TutorId);
+
+        if (tutorBookingCountForDay >= BookingLimits.MaxBookingsPerTutorPerDay)
+        {
+            response.Errors.Add(CreateError(
+                code: ValidationErrorCodes.TutorDailyLimitExceeded,
+                message: $"Tutor '{request.TutorId}' cannot exceed {BookingLimits.MaxBookingsPerTutorPerDay} bookings on {request.LessonDate:yyyy-MM-dd}."));
+        }
+
         response.Valid = response.Errors.Count == 0;
         return response;
     }
