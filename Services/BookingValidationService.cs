@@ -23,7 +23,7 @@ public sealed class BookingValidationService
         {
             response.Errors.Add(CreateError(
                 code: ValidationErrorCodes.InvalidDuration,
-                message: $"Duration must be either {BookingDurations.SixtyMinutes} or {BookingDurations.NinetyMinutes} minutes."));
+                message: $"Duration must be either {BookingDurations.Min} or {BookingDurations.Max} minutes."));
         }
 
         if (request.LessonDate.DayOfWeek == DayOfWeek.Monday)
