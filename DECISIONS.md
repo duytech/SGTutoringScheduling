@@ -90,6 +90,11 @@ the tutor would not exceed six booked lessons that day.
 
 A booking is accepted only when all applicable rules pass.
 
+Why:
+
+- The seed data already contains historical rule breaches and apparent exceptions.
+- Hard-coding every operational rule into the database would make import and future exceptions awkward.
+- The code layer is the right place to apply policy while still preserving historical fact.
 
 
 ## 9. API shape
