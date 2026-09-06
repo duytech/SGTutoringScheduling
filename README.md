@@ -14,12 +14,14 @@ Minimal ASP.NET Core API for validating a new tutoring booking against a seeded 
 
 ## Seed data
 
-The API reads from:
+On first run the API creates a SQLite database (`synergie.db`) and seeds it
+from the supplied CSV export:
 
-- `Data/lessons.json`
-- `Data/tutors.json`
+- `seed-data/lessons_export.csv`
+- `seed-data/tutors.csv`
 
-These files were derived from the supplied CSV export and are loaded at request time by `JsonScheduleStore`.
+Rows are loaded verbatim, including the historical conflicts. Delete
+`synergie.db` to re-seed.
 
 ## Error codes
 

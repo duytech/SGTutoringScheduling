@@ -1,15 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 using SynergieGlobalTutoringScheduling.Contracts;
+using SynergieGlobalTutoringScheduling.Data;
 using SynergieGlobalTutoringScheduling.Domain;
 
 namespace SynergieGlobalTutoringScheduling.Services;
 
 public sealed class BookingValidationService
 {
-    private readonly JsonScheduleStore _scheduleStore;
+    private readonly AppDbContext _db;
 
-    public BookingValidationService(JsonScheduleStore scheduleStore)
+    public BookingValidationService(AppDbContext db)
     {
-        _scheduleStore = scheduleStore;
+        _db = db;
     }
 
     public async Task<ValidateBookingResponse> ValidateAsync(
@@ -17,8 +19,11 @@ public sealed class BookingValidationService
         CancellationToken cancellationToken = default)
     {
         var response = new ValidateBookingResponse();
-        var tutors = await _scheduleStore.LoadTutorsAsync(cancellationToken);
-        var bookings = await _scheduleStore.LoadBookingsAsync(cancellationToken);
+        var tutorExists = await _db.Tutors
+            .AnyAsync(tutor => tutor.Id == request.TutorId, cancellationToken);
+        var bookings = await _db.Bookings
+            .Where(booking => booking.LessonDate == request.LessonDate)
+            .ToListAsync(cancellationToken);
 
         if (!BookingDurations.IsAllowed(request.DurationMinutes))
         {
@@ -34,7 +39,6 @@ public sealed class BookingValidationService
                 message: "The centre does not accept new bookings on Monday."));
         }
 
-        var tutorExists = tutors.Any(tutor => tutor.Id == request.TutorId);
         if (!tutorExists)
         {
             response.Errors.Add(CreateError(
