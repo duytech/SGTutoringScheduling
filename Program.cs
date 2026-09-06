@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SynergieGlobalTutoringScheduling.Data;
 using SynergieGlobalTutoringScheduling.Endpoints.Bookings;
 using SynergieGlobalTutoringScheduling.Endpoints.Conflicts;
+using SynergieGlobalTutoringScheduling.Endpoints.Schedule;
 using SynergieGlobalTutoringScheduling.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,5 +23,6 @@ using (var scope = app.Services.CreateScope())
 app.MapGet("/", () => "Hello World!");
 app.MapValidateBookingEndpoint();
 app.MapConflictsEndpoint();
+app.MapScheduleEndpoint();
 
 app.Run();

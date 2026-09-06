@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SynergieGlobalTutoringScheduling.Contracts;
 using SynergieGlobalTutoringScheduling.Data;
+using SynergieGlobalTutoringScheduling.Domain;
 
 namespace SynergieGlobalTutoringScheduling.Services;
 
@@ -15,6 +16,60 @@ public sealed class ScheduleService
     public ScheduleService(AppDbContext db)
     {
         _db = db;
+    }
+
+    public async Task<ScheduleDayResponse> GetDayAsync(
+        DateOnly date,
+        CancellationToken cancellationToken = default)
+    {
+        var rooms = await _db.Rooms
+            .OrderBy(room => room.Id)
+            .ToListAsync(cancellationToken);
+
+        var bookings = await _db.Bookings
+            .Include(booking => booking.Tutor)
+            .Where(booking => booking.LessonDate == date)
+            .ToListAsync(cancellationToken);
+
+        var conflicts = ConflictDetector.Detect(bookings);
+        var codesByBookingId = MapConflictCodesByBooking(conflicts);
+
+        var roomSchedules = rooms
+            .Select(room => new RoomScheduleDto
+            {
+                RoomId = room.Id,
+                RoomName = room.Name,
+                Lessons = bookings
+                    .Where(booking => booking.RoomId == room.Id)
+                    .OrderBy(booking => booking.StartTime)
+                    .ThenBy(booking => booking.Id, StringComparer.Ordinal)
+                    .Select(booking => ToLessonDto(booking, codesByBookingId))
+                    .ToList(),
+            })
+            .ToList();
+
+        var tutorLoads = bookings
+            .Where(booking => booking.Status != BookingStatus.Cancelled)
+            .GroupBy(booking => (booking.TutorId, TutorName: booking.Tutor.Name))
+            .OrderBy(group => group.Key.TutorId, StringComparer.Ordinal)
+            .Select(group => new TutorLoadDto
+            {
+                TutorId = group.Key.TutorId,
+                TutorName = group.Key.TutorName,
+                LessonCount = group.Count(),
+                Limit = BookingLimits.MaxBookingsPerTutorPerDay,
+                OverLimit = group.Count() > BookingLimits.MaxBookingsPerTutorPerDay,
+            })
+            .ToList();
+
+        return new ScheduleDayResponse
+        {
+            Date = date,
+            IsMonday = date.DayOfWeek == DayOfWeek.Monday,
+            Rooms = roomSchedules,
+            TutorLoads = tutorLoads,
+            Conflicts = conflicts.ToList(),
+        };
     }
 
     public async Task<ConflictsResponse> GetConflictsAsync(
@@ -47,6 +102,52 @@ public sealed class ScheduleService
                 Warnings = conflicts.Count(c => c.Severity == ValidationIssueSeverities.Warning),
             },
             Conflicts = conflicts.ToList(),
+        };
+    }
+
+    private static Dictionary<string, List<string>> MapConflictCodesByBooking(
+        IReadOnlyList<ConflictDto> conflicts)
+    {
+        var codesByBookingId = new Dictionary<string, List<string>>();
+
+        foreach (var conflict in conflicts)
+        {
+            foreach (var bookingId in conflict.BookingIds)
+            {
+                if (!codesByBookingId.TryGetValue(bookingId, out var codes))
+                {
+                    codes = [];
+                    codesByBookingId[bookingId] = codes;
+                }
+
+                if (!codes.Contains(conflict.Code))
+                {
+                    codes.Add(conflict.Code);
+                }
+            }
+        }
+
+        return codesByBookingId;
+    }
+
+    private static LessonDto ToLessonDto(
+        Booking booking,
+        IReadOnlyDictionary<string, List<string>> codesByBookingId)
+    {
+        return new LessonDto
+        {
+            Id = booking.Id,
+            StartTime = booking.StartTime,
+            EndTime = booking.StartTime.AddMinutes(booking.DurationMinutes),
+            DurationMinutes = booking.DurationMinutes,
+            StudentName = booking.StudentName,
+            TutorId = booking.TutorId,
+            TutorName = booking.Tutor.Name,
+            Status = booking.Status.ToString(),
+            GroupId = booking.GroupId,
+            ConflictCodes = codesByBookingId.TryGetValue(booking.Id, out var codes)
+                ? codes
+                : [],
         };
     }
 }
