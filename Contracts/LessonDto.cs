@@ -24,5 +24,8 @@ public sealed class LessonDto
 
     public string? GroupId { get; set; }
 
+    /// <summary>True when this lesson landed on this day by a move made after the cut-off.</summary>
+    public bool MovedAfterCutoff { get; set; }
+
     public List<string> ConflictCodes { get; set; } = [];
 }

@@ -91,7 +91,21 @@
     }
     .badge.pair { background: #45505f; }
     .badge.cancelled { background: #999; }
+    .badge.moved { background: #8a5a00; }
     .empty { padding: 8px 12px; color: var(--muted); font-size: 13px; }
+
+    #changes { margin-bottom: 20px; }
+    #changes h2 { font-size: 14px; margin: 0 0 6px; }
+    .change {
+      border-left: 4px solid var(--warn);
+      background: var(--warn-bg);
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .change .when { color: var(--muted); font-size: 12px; }
+    .lesson.moved-late { border-left: 3px solid var(--warn); }
   </style>
 </head>
 <body>
@@ -103,6 +117,7 @@
   </header>
   <main>
     <div id="banner"></div>
+    <div id="changes"></div>
     <div class="loads" id="loads"></div>
     <div class="rooms" id="rooms"></div>
   </main>
@@ -110,6 +125,7 @@
   <script>
     const dateInput = document.getElementById("date");
     const banner = document.getElementById("banner");
+    const changes = document.getElementById("changes");
     const loads = document.getElementById("loads");
     const rooms = document.getElementById("rooms");
     const status = document.getElementById("status");
@@ -125,8 +141,26 @@
       dateInput.value = data.date;
       status.textContent = data.isMonday ? "centre closed (Monday)" : "";
       renderBanner(data.conflicts);
+      renderChanges(data.changes, data.date);
       renderLoads(data.tutorLoads);
       renderRooms(data.rooms);
+    }
+
+    function renderChanges(events, day) {
+      if (!events || !events.length) { changes.innerHTML = ""; return; }
+      changes.innerHTML = `<h2>Changes since 16:00 the day before — tell the tutors</h2>` +
+        events.map(e => {
+          const from = `${e.fromDate === day ? "" : e.fromDate + " "}${fmt(e.fromStartTime)} ${e.fromRoomId}`;
+          const to = `${e.toDate === day ? "" : e.toDate + " "}${fmt(e.toStartTime)} ${e.toRoomId}`;
+          let detail;
+          if (e.fromDate === day && e.toDate === day) detail = `re-slotted ${from.trim()} → ${to.trim()}`;
+          else if (e.toDate === day) detail = `moved here from ${from.trim()}`;
+          else detail = `moved off this day to ${to.trim()}`;
+          return `<div class="change">
+            <strong>${e.lessonId}</strong> ${detail}${e.reason ? ` — ${escapeHtml(e.reason)}` : ""}
+            <div class="when">recorded ${e.occurredAt.replace("T", " ").slice(0, 16)}</div>
+          </div>`;
+        }).join("");
     }
 
     function renderBanner(conflicts) {
@@ -164,10 +198,12 @@
       const badges = [
         ...l.conflictCodes.map(c => `<span class="badge">${c}</span>`),
         l.groupId ? `<span class="badge pair">exam pair</span>` : "",
+        l.movedAfterCutoff ? `<span class="badge moved">moved late</span>` : "",
         l.status !== "Booked" ? `<span class="badge cancelled">${l.status}</span>` : "",
       ].join("");
+      const cls = clash ? "clash" : (l.movedAfterCutoff ? "moved-late" : "");
       return `
-        <div class="lesson ${clash ? "clash" : ""}">
+        <div class="lesson ${cls}">
           <span class="time">${fmt(l.startTime)}–${fmt(l.endTime)}</span>
           <div class="who">${escapeHtml(l.studentName)} · ${escapeHtml(l.tutorName)}</div>
           ${badges ? `<div class="badges">${badges}</div>` : ""}

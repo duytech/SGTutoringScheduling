@@ -34,6 +34,16 @@ public sealed class ScheduleService
         var conflicts = ConflictDetector.Detect(bookings);
         var codesByBookingId = MapConflictCodesByBooking(conflicts);
 
+        var cutoffMoves = await _db.LessonEvents
+            .Where(lessonEvent => lessonEvent.Type == LessonEventType.Moved && lessonEvent.AfterCutoff)
+            .Where(lessonEvent => lessonEvent.ToDate == date || lessonEvent.FromDate == date)
+            .ToListAsync(cancellationToken);
+
+        var landedLate = cutoffMoves
+            .Where(lessonEvent => lessonEvent.ToDate == date)
+            .Select(lessonEvent => lessonEvent.LessonId)
+            .ToHashSet();
+
         var roomSchedules = rooms
             .Select(room => new RoomScheduleDto
             {
@@ -43,7 +53,10 @@ public sealed class ScheduleService
                     .Where(booking => booking.RoomId == room.Id)
                     .OrderBy(booking => booking.StartTime)
                     .ThenBy(booking => booking.Id, StringComparer.Ordinal)
-                    .Select(booking => LessonMapper.ToDto(booking, codesByBookingId.GetValueOrDefault(booking.Id)))
+                    .Select(booking => LessonMapper.ToDto(
+                        booking,
+                        codesByBookingId.GetValueOrDefault(booking.Id),
+                        movedAfterCutoff: landedLate.Contains(booking.Id)))
                     .ToList(),
             })
             .ToList();
@@ -69,6 +82,10 @@ public sealed class ScheduleService
             Rooms = roomSchedules,
             TutorLoads = tutorLoads,
             Conflicts = conflicts.ToList(),
+            Changes = cutoffMoves
+                .OrderBy(lessonEvent => lessonEvent.OccurredAt)
+                .Select(LessonMapper.ToDto)
+                .ToList(),
         };
     }
 

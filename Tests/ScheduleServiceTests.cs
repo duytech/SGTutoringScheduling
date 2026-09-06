@@ -36,6 +36,22 @@ public class ScheduleServiceTests : SqliteFixture
     }
 
     [Fact]
+    public async Task GetDayAsync_ListsMovesMadeAfterTheCutoffAndMarksTheLesson()
+    {
+        Add(BookingFactory.Create("L1", date: "2026-03-06", start: "09:00", roomId: "R1"));
+
+        await new MoveLessonService(Db, new FixedClock("2026-03-06T09:00:00")).MoveAsync(
+            "L1",
+            new() { ToDate = new DateOnly(2026, 3, 6), ToStartTime = new TimeOnly(11, 0) });
+
+        var day = await Service.GetDayAsync(new DateOnly(2026, 3, 6));
+
+        Assert.Single(day.Changes, change => change.LessonId == "L1");
+        var lesson = day.Rooms.SelectMany(room => room.Lessons).Single();
+        Assert.True(lesson.MovedAfterCutoff);
+    }
+
+    [Fact]
     public async Task GetConflictsAsync_RespectsDateRange()
     {
         Add(BookingFactory.Create("M", date: "2026-03-09", start: "10:00"));

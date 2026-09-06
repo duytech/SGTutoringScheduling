@@ -5,7 +5,10 @@ namespace TutoringScheduling.Services;
 
 internal static class LessonMapper
 {
-    public static LessonDto ToDto(Booking booking, IReadOnlyList<string>? conflictCodes = null)
+    public static LessonDto ToDto(
+        Booking booking,
+        IReadOnlyList<string>? conflictCodes = null,
+        bool movedAfterCutoff = false)
     {
         return new LessonDto
         {
@@ -20,6 +23,7 @@ internal static class LessonMapper
             RoomId = booking.RoomId,
             Status = booking.Status.ToString(),
             GroupId = booking.GroupId,
+            MovedAfterCutoff = movedAfterCutoff,
             ConflictCodes = conflictCodes is null ? [] : [.. conflictCodes],
         };
     }
@@ -28,6 +32,7 @@ internal static class LessonMapper
     {
         return new LessonEventDto
         {
+            LessonId = lessonEvent.LessonId,
             Type = lessonEvent.Type.ToString(),
             OccurredAt = lessonEvent.OccurredAt,
             FromDate = lessonEvent.FromDate,

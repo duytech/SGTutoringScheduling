@@ -2,6 +2,8 @@ namespace TutoringScheduling.Contracts;
 
 public sealed class LessonEventDto
 {
+    public required string LessonId { get; set; }
+
     public required string Type { get; set; }
 
     public required DateTimeOffset OccurredAt { get; set; }
