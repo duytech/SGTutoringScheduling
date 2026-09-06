@@ -1,127 +1,74 @@
 # Synergie Global Tutoring Scheduling
 
-Minimal ASP.NET Core API for validating a new tutoring booking against a seeded schedule stored in JSON files.
+Minimal ASP.NET Core API + a small static room board for **Bright Path Learning
+Centre**. The chosen feature is a **conflict detection engine** over the
+centre's schedule, surfaced through a read-only **"today" view**.
 
-## What it validates
+Stack: ASP.NET Core Minimal API, EF Core, SQLite.
 
-- tutor exists
-- duration is within the allowed range
-- new bookings are not accepted on Monday
-- student overlap
-- tutor overlap
-- room overlap
-- tutor daily booking limit
-
-## Seed data
-
-On first run the API creates a SQLite database (`synergie.db`) and seeds it
-from the supplied CSV export:
-
-- `seed-data/lessons_export.csv`
-- `seed-data/tutors.csv`
-
-Rows are loaded verbatim, including the historical conflicts. Delete
-`synergie.db` to re-seed.
-
-## Error codes
-
-- `INVALID_DURATION`: duration is not one of the allowed lesson lengths
-- `CENTRE_CLOSED_MONDAY`: the requested lesson date is a Monday
-- `TUTOR_NOT_FOUND`: the requested tutor id does not exist in the seed data
-- `STUDENT_OVERLAP`: the student already has another booking in the same time range
-- `TUTOR_OVERLAP`: the tutor already has another booking in the same time range
-- `ROOM_OVERLAP`: the room is already occupied in the same time range
-- `TUTOR_DAILY_LIMIT_EXCEEDED`: the tutor would exceed the maximum number of bookings for that day
-
-## Run the project
+## Run it
 
 ```bash
-dotnet restore
 dotnet run
 ```
 
-By default, ASP.NET Core prints the local URL in the terminal when the app starts. Use that base URL for the requests below.
+On start the app applies migrations, creates `synergie.db`, and seeds it from
+the CSV export under `seed-data/`. ASP.NET Core prints the local URL; open it
+in a browser for the room board, or call the API directly.
 
-## Validate a booking
-
-Endpoint:
-
-```http
-POST /api/bookings/validate
-Content-Type: application/json
+```bash
+dotnet test
 ```
 
-### Example request with conflicts
+runs the conflict-engine unit tests and the seed-data assertions.
 
-This request clashes with existing bookings on `2026-03-10 09:00`.
+### "Today"
+
+The brief pins "today" to a date inside the seeded week, not the real clock.
+The default is **2026-03-06** (`Schedule:Today` in `appsettings.json`). The
+board and `GET /api/schedule` use it when no date is given.
+
+## Seed data
+
+`seed-data/lessons_export.csv` (35 rows, 2026-03-03 … 2026-03-10) and
+`seed-data/tutors.csv` are loaded verbatim, historical conflicts included.
+Delete `synergie.db` to re-seed.
+
+## Endpoints
+
+### `GET /api/schedule?date=YYYY-MM-DD`
+
+One day, grouped by room (all six rooms, empty ones included). Each lesson
+carries the conflict codes it is part of; the response also has a per-tutor
+load line and the day's conflicts. `date` defaults to the pinned today.
+
+### `GET /api/conflicts?from=YYYY-MM-DD&to=YYYY-MM-DD`
+
+Runs the engine over stored bookings (optionally within a date range) and
+returns every clash plus an error/warning count.
 
 ```json
 {
-  "studentName": "New Student",
-  "tutorId": "T1",
-  "room": "R1",
-  "lessonDate": "2026-03-10",
-  "startTime": "09:00:00",
-  "durationMinutes": 60
-}
-```
-
-Example response:
-
-```json
-{
-  "valid": false,
-  "errors": [
+  "from": null,
+  "to": null,
+  "summary": { "errors": 2, "warnings": 2 },
+  "conflicts": [
     {
-      "code": "TUTOR_OVERLAP",
-      "message": "Tutor 'T1' already has a booking that overlaps 2026-03-10 09:00.",
+      "code": "TUTOR_DOUBLE_BOOKED",
       "severity": "error",
-      "relatedBookingIds": ["L033", "L034"]
-    },
-    {
-      "code": "ROOM_OVERLAP",
-      "message": "Room 'R1' is already occupied at 2026-03-10 09:00.",
-      "severity": "error",
-      "relatedBookingIds": ["L033"]
+      "date": "2026-03-10",
+      "message": "Tutor 'T1' is booked for two overlapping lessons on 2026-03-10 09:00.",
+      "bookingIds": ["L033", "L034"],
+      "tutorId": "T1"
     }
-  ],
-  "warnings": []
+  ]
 }
 ```
 
-### Example request that exceeds the tutor daily limit
+### `POST /api/bookings/validate`
 
-This request targets tutor `T1` on `2026-03-06`, where the seed data already contains 7 active bookings for that tutor.
-
-```json
-{
-  "studentName": "Another Student",
-  "tutorId": "T1",
-  "room": "R6",
-  "lessonDate": "2026-03-06",
-  "startTime": "08:00:00",
-  "durationMinutes": 60
-}
-```
-
-Example response:
-
-```json
-{
-  "valid": false,
-  "errors": [
-    {
-      "code": "TUTOR_DAILY_LIMIT_EXCEEDED",
-      "message": "Tutor 'T1' already has 7 bookings on 2026-03-06, so this request would exceed the daily limit of 6.",
-      "severity": "error",
-      "relatedBookingIds": ["L018", "L021", "L022", "L024", "L025", "L026", "L027"]
-    }
-  ],
-  "warnings": []
-}
-```
-
-### Example request that passes
+Checks a *proposed* booking before it is created (duration, Monday closure,
+tutor exists, student/tutor/room overlap, tutor daily limit).
 
 ```json
 {
@@ -134,12 +81,20 @@ Example response:
 }
 ```
 
-Expected response:
+## Conflict codes
 
-```json
-{
-  "valid": true,
-  "errors": [],
-  "warnings": []
-}
-```
+| Code | Severity | Meaning |
+| --- | --- | --- |
+| `TUTOR_DOUBLE_BOOKED` | error | Same tutor in two overlapping lessons |
+| `ROOM_DOUBLE_BOOKED` | error | Same room, two overlapping lessons, not an exam pair |
+| `STUDENT_DOUBLE_BOOKED` | error | Same student in two overlapping lessons |
+| `TUTOR_DAILY_LIMIT` | warning | A tutor is over the 6-lessons-a-day limit |
+| `CENTRE_CLOSED_MONDAY` | warning | A lesson is scheduled on a Monday |
+
+Cancelled bookings are ignored (the slot is free); no-shows still occupy the
+slot. Lessons that share a `GroupId` are a sanctioned exam pair and do not
+clash with each other.
+
+The seed export contains exactly two errors (`L033`/`L034` tutor double-booked,
+`L007`/`L008` student with two tutors) and two warnings (tutor `T1` over limit
+on 2026-03-06, one Monday lesson `L032`).
