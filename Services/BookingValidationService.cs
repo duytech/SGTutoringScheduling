@@ -71,7 +71,7 @@ public sealed class BookingValidationService
         }
 
         var roomOverlapIds = overlappingBookings
-            .Where(booking => booking.Room == request.Room)
+            .Where(booking => booking.RoomId == request.Room)
             .Select(booking => booking.Id)
             .ToList();
 

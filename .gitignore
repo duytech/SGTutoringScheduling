@@ -6,6 +6,11 @@
 # dotenv files
 .env
 
+# Local SQLite database (recreated from seed data on startup)
+*.db
+*.db-shm
+*.db-wal
+
 # User-specific files
 *.rsuser
 *.suo
