@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bright Path — Today</title>
+  <style>
+    :root {
+      --error: #b3261e;
+      --error-bg: #fceceb;
+      --warn: #8a5a00;
+      --warn-bg: #fdf3e2;
+      --line: #d9d9d9;
+      --muted: #666;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #1b1b1b;
+      background: #fafafa;
+    }
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+    h1 { font-size: 18px; margin: 0; }
+    .muted { color: var(--muted); }
+    main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+
+    #banner { margin-bottom: 20px; }
+    .conflict {
+      border-left: 4px solid var(--error);
+      background: var(--error-bg);
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      border-radius: 3px;
+    }
+    .conflict.warn {
+      border-left-color: var(--warn);
+      background: var(--warn-bg);
+    }
+    .conflict .tag {
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .03em;
+    }
+    .conflict .ids { color: var(--muted); font-size: 13px; }
+    .ok { color: #1a7f37; }
+
+    .loads { margin-bottom: 20px; font-size: 14px; }
+    .loads .over { color: var(--error); font-weight: 600; }
+
+    .rooms {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .room {
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .room h2 {
+      font-size: 14px;
+      margin: 0;
+      padding: 8px 12px;
+      background: #f0f0f0;
+      border-bottom: 1px solid var(--line);
+    }
+    .lesson { padding: 8px 12px; border-bottom: 1px solid #eee; }
+    .lesson:last-child { border-bottom: 0; }
+    .lesson.clash { background: var(--error-bg); border-left: 3px solid var(--error); }
+    .lesson .time { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .lesson .who { font-size: 13px; }
+    .lesson .badges { margin-top: 3px; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--error);
+      color: #fff;
+      margin-right: 4px;
+    }
+    .badge.pair { background: #45505f; }
+    .badge.cancelled { background: #999; }
+    .empty { padding: 8px 12px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bright Path Learning Centre</h1>
+    <span class="muted">Room board for</span>
+    <input type="date" id="date" />
+    <span class="muted" id="status"></span>
+  </header>
+  <main>
+    <div id="banner"></div>
+    <div class="loads" id="loads"></div>
+    <div class="rooms" id="rooms"></div>
+  </main>
+
+  <script>
+    const dateInput = document.getElementById("date");
+    const banner = document.getElementById("banner");
+    const loads = document.getElementById("loads");
+    const rooms = document.getElementById("rooms");
+    const status = document.getElementById("status");
+
+    function fmt(t) { return (t || "").slice(0, 5); }
+
+    async function load(date) {
+      status.textContent = "loading…";
+      const url = date ? `/api/schedule?date=${date}` : "/api/schedule";
+      const res = await fetch(url);
+      if (!res.ok) { status.textContent = "failed to load"; return; }
+      const data = await res.json();
+      dateInput.value = data.date;
+      status.textContent = data.isMonday ? "centre closed (Monday)" : "";
+      renderBanner(data.conflicts);
+      renderLoads(data.tutorLoads);
+      renderRooms(data.rooms);
+    }
+
+    function renderBanner(conflicts) {
+      if (!conflicts.length) {
+        banner.innerHTML = `<div class="conflict" style="border-left-color:#1a7f37;background:#e9f6ec">
+          <span class="ok">No conflicts for this day.</span></div>`;
+        return;
+      }
+      banner.innerHTML = conflicts.map(c => `
+        <div class="conflict ${c.severity === "warning" ? "warn" : ""}">
+          <span class="tag">${c.code}</span> — ${escapeHtml(c.message)}
+          <div class="ids">bookings: ${c.bookingIds.join(", ")}</div>
+        </div>`).join("");
+    }
+
+    function renderLoads(tutorLoads) {
+      if (!tutorLoads.length) { loads.textContent = ""; return; }
+      loads.innerHTML = "Tutor load today: " + tutorLoads.map(t =>
+        `<span class="${t.overLimit ? "over" : ""}">${escapeHtml(t.tutorName)} ${t.lessonCount}/${t.limit}</span>`
+      ).join(" · ");
+    }
+
+    function renderRooms(roomList) {
+      rooms.innerHTML = roomList.map(room => `
+        <div class="room">
+          <h2>${escapeHtml(room.roomName)}</h2>
+          ${room.lessons.length
+            ? room.lessons.map(renderLesson).join("")
+            : `<div class="empty">no lessons</div>`}
+        </div>`).join("");
+    }
+
+    function renderLesson(l) {
+      const clash = l.conflictCodes.length > 0;
+      const badges = [
+        ...l.conflictCodes.map(c => `<span class="badge">${c}</span>`),
+        l.groupId ? `<span class="badge pair">exam pair</span>` : "",
+        l.status !== "Booked" ? `<span class="badge cancelled">${l.status}</span>` : "",
+      ].join("");
+      return `
+        <div class="lesson ${clash ? "clash" : ""}">
+          <span class="time">${fmt(l.startTime)}–${fmt(l.endTime)}</span>
+          <div class="who">${escapeHtml(l.studentName)} · ${escapeHtml(l.tutorName)}</div>
+          ${badges ? `<div class="badges">${badges}</div>` : ""}
+        </div>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    dateInput.addEventListener("change", () => load(dateInput.value));
+    load();
+  </script>
+</body>
+</html>

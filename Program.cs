@@ -20,7 +20,9 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(db, app.Environment.ContentRootPath);
 }
 
-app.MapGet("/", () => "Hello World!");
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapValidateBookingEndpoint();
 app.MapConflictsEndpoint();
 app.MapScheduleEndpoint();
