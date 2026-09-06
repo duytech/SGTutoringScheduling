@@ -72,6 +72,35 @@ public sealed class ScheduleService
         };
     }
 
+    public async Task<LessonHistoryResponse?> GetLessonHistoryAsync(
+        string lessonId,
+        CancellationToken cancellationToken = default)
+    {
+        var lesson = await _db.Bookings
+            .Include(booking => booking.Tutor)
+            .FirstOrDefaultAsync(booking => booking.Id == lessonId, cancellationToken);
+
+        if (lesson is null)
+        {
+            return null;
+        }
+
+        // SQLite cannot sort by DateTimeOffset, so order once materialised.
+        var events = await _db.LessonEvents
+            .Where(lessonEvent => lessonEvent.LessonId == lessonId)
+            .ToListAsync(cancellationToken);
+
+        return new LessonHistoryResponse
+        {
+            Lesson = LessonMapper.ToDto(lesson),
+            Events = events
+                .OrderBy(lessonEvent => lessonEvent.OccurredAt)
+                .ThenBy(lessonEvent => lessonEvent.Id)
+                .Select(LessonMapper.ToDto)
+                .ToList(),
+        };
+    }
+
     public async Task<ConflictsResponse> GetConflictsAsync(
         DateOnly? from,
         DateOnly? to,

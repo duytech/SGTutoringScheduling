@@ -27,5 +27,6 @@ app.UseStaticFiles();
 app.MapConflictsEndpoint();
 app.MapScheduleEndpoint();
 app.MapMoveLessonEndpoint();
+app.MapLessonHistoryEndpoint();
 
 app.Run();
