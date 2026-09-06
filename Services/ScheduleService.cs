@@ -43,7 +43,7 @@ public sealed class ScheduleService
                     .Where(booking => booking.RoomId == room.Id)
                     .OrderBy(booking => booking.StartTime)
                     .ThenBy(booking => booking.Id, StringComparer.Ordinal)
-                    .Select(booking => ToLessonDto(booking, codesByBookingId))
+                    .Select(booking => LessonMapper.ToDto(booking, codesByBookingId.GetValueOrDefault(booking.Id)))
                     .ToList(),
             })
             .ToList();
@@ -128,26 +128,5 @@ public sealed class ScheduleService
         }
 
         return codesByBookingId;
-    }
-
-    private static LessonDto ToLessonDto(
-        Booking booking,
-        IReadOnlyDictionary<string, List<string>> codesByBookingId)
-    {
-        return new LessonDto
-        {
-            Id = booking.Id,
-            StartTime = booking.StartTime,
-            EndTime = booking.StartTime.AddMinutes(booking.DurationMinutes),
-            DurationMinutes = booking.DurationMinutes,
-            StudentName = booking.StudentName,
-            TutorId = booking.TutorId,
-            TutorName = booking.Tutor.Name,
-            Status = booking.Status.ToString(),
-            GroupId = booking.GroupId,
-            ConflictCodes = codesByBookingId.TryGetValue(booking.Id, out var codes)
-                ? codes
-                : [],
-        };
     }
 }
