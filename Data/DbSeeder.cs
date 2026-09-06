@@ -55,7 +55,7 @@ public static class DbSeeder
             .ToList();
     }
 
-    private static List<Tutor> ReadTutors(string filePath)
+    internal static List<Tutor> ReadTutors(string filePath)
     {
         return ReadDataRows(filePath)
             .Select(fields => new Tutor
@@ -68,7 +68,7 @@ public static class DbSeeder
             .ToList();
     }
 
-    private static List<Booking> ReadBookings(string filePath)
+    internal static List<Booking> ReadBookings(string filePath)
     {
         var bookings = new List<Booking>();
 
