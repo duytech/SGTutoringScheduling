@@ -1,8 +1,12 @@
 # Tutoring Scheduling
 
-Minimal ASP.NET Core API + a small static room board for **Bright Path Learning
-Centre**. The chosen feature is a **conflict detection engine** over the
-centre's schedule, surfaced through a read-only **"today" view**.
+Internal scheduling tool for **Bright Path Learning Centre** (Da Nang).
+
+The one feature built here is **rescheduling a lesson**: a single intent
+endpoint that checks the target slot against the conflict engine, records the
+change in an append-only log, and makes a change past the daily cut-off
+**visible as a change** rather than a silent overwrite. A read-only room board
+shows the result.
 
 Stack: ASP.NET Core Minimal API, EF Core, SQLite.
 
@@ -13,73 +17,66 @@ dotnet run
 ```
 
 On start the app applies migrations, creates `tutoring.db`, and seeds it from
-the CSV export under `seed-data/`. ASP.NET Core prints the local URL; open it
-in a browser for the room board, or call the API directly.
+the CSV export under `seed-data/` (35 lessons, week of 2026-03-03 … 03-10),
+loaded verbatim including the historical conflicts. It also writes a `Created`
+event per lesson and reconstructs `L032`'s "moved from Sunday" history, which
+the export itself lost. Delete `tutoring.db` to re-seed.
+
+Open the printed URL for the board, or call the API directly.
 
 ```bash
 dotnet test
 ```
 
-runs the conflict-engine unit tests and the seed-data assertions.
+runs the conflict-engine and service tests (unit + SQLite-backed).
 
-### "Today"
+### "Now"
 
-The brief pins "today" to a date inside the seeded week, not the real clock.
-The default is **2026-03-06** (`Schedule:Today` in `appsettings.json`). The
-board and `GET /api/schedule` use it when no date is given.
+The brief pins the clock to a value inside the seeded week, never the real
+system clock. It is **2026-03-06 09:00 (+07:00)**, set by `Schedule:Now` in
+`appsettings.json`, and drives both the board's default day and the
+"after 16:00 the day before" cut-off.
 
-## Seed data
+## The feature — reschedule a lesson
 
-`seed-data/lessons_export.csv` (35 rows, 2026-03-03 … 2026-03-10) and
-`seed-data/tutors.csv` are loaded verbatim, historical conflicts included.
-Delete `tutoring.db` to re-seed.
+### `POST /api/lessons/{id}/move`
 
-## Endpoints
+```json
+{
+  "toDate": "2026-03-07",
+  "toStartTime": "14:00:00",
+  "toRoomId": "R4",
+  "reason": "family asked to move it later"
+}
+```
+
+`toRoomId` is optional (keeps the current room). The move is **rejected**
+(`409`) when it would create an error-level conflict (tutor / room / student
+double-booked), when the lesson is cancelled, part of an exam pair, or the
+target day is a Monday. Non-blocking issues (e.g. the tutor going over 6
+lessons that day) come back as `warnings`, not a rejection.
+
+On success the lesson row is updated and a `Moved` event is appended with
+`afterCutoff` set when the change was made after 16:00 the day before the
+lesson.
+
+### `GET /api/lessons/{id}/history`
+
+The lesson's current state plus its event log, oldest first.
+
+## Supporting read views
 
 ### `GET /api/schedule?date=YYYY-MM-DD`
 
-One day, grouped by room (all six rooms, empty ones included). Each lesson
-carries the conflict codes it is part of; the response also has a per-tutor
-load line and the day's conflicts. `date` defaults to the pinned today.
+One day, grouped by room (all six, empty ones included). Each lesson carries
+its conflict codes and a `movedAfterCutoff` flag; the response also has a
+per-tutor load line, the day's conflicts, and a `changes` list of
+post-cut-off moves touching that day. `date` defaults to the pinned today.
 
-### `GET /api/conflicts?from=YYYY-MM-DD&to=YYYY-MM-DD`
+### `GET /api/conflicts?from=&to=`
 
-Runs the engine over stored bookings (optionally within a date range) and
+Runs the conflict engine over stored bookings (optionally within a range) and
 returns every clash plus an error/warning count.
-
-```json
-{
-  "from": null,
-  "to": null,
-  "summary": { "errors": 2, "warnings": 2 },
-  "conflicts": [
-    {
-      "code": "TUTOR_DOUBLE_BOOKED",
-      "severity": "error",
-      "date": "2026-03-10",
-      "message": "Tutor 'T1' is booked for two overlapping lessons on 2026-03-10 09:00.",
-      "bookingIds": ["L033", "L034"],
-      "tutorId": "T1"
-    }
-  ]
-}
-```
-
-### `POST /api/bookings/validate`
-
-Checks a *proposed* booking before it is created (duration, Monday closure,
-tutor exists, student/tutor/room overlap, tutor daily limit).
-
-```json
-{
-  "studentName": "New Student",
-  "tutorId": "T2",
-  "room": "R4",
-  "lessonDate": "2026-03-07",
-  "startTime": "13:00:00",
-  "durationMinutes": 60
-}
-```
 
 ## Conflict codes
 
@@ -89,12 +86,20 @@ tutor exists, student/tutor/room overlap, tutor daily limit).
 | `ROOM_DOUBLE_BOOKED` | error | Same room, two overlapping lessons, not an exam pair |
 | `STUDENT_DOUBLE_BOOKED` | error | Same student in two overlapping lessons |
 | `TUTOR_DAILY_LIMIT` | warning | A tutor is over the 6-lessons-a-day limit |
-| `CENTRE_CLOSED_MONDAY` | warning | A lesson is scheduled on a Monday |
+| `CENTRE_CLOSED_MONDAY` | warning | A lesson falls on a Monday |
 
-Cancelled bookings are ignored (the slot is free); no-shows still occupy the
-slot. Lessons that share a `GroupId` are a sanctioned exam pair and do not
-clash with each other.
+Cancelled bookings are ignored (the slot is free); no-shows still occupy it.
+Lessons sharing a `GroupId` are a sanctioned exam pair and never clash with
+each other. The seed export has two errors (`L033`/`L034`, `L007`/`L008`) and
+two warnings (tutor `T1` over limit on 2026-03-06, Monday lesson `L032`).
 
-The seed export contains exactly two errors (`L033`/`L034` tutor double-booked,
-`L007`/`L008` student with two tutors) and two warnings (tutor `T1` over limit
-on 2026-03-06, one Monday lesson `L032`).
+## Layout
+
+```
+Domain/       entities, the centre calendar (UTC+7, 16:00 cut-off)
+Data/         AppDbContext, migrations, CSV seeder
+Services/     ConflictDetector (pure), MoveLessonService, ScheduleService, IClock
+Endpoints/    one file per route
+Tests/        xUnit; SqliteFixture + FixedClock back the service tests
+wwwroot/      the static board
+```

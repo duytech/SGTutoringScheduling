@@ -2,180 +2,182 @@
 
 ## 1. Questions I would ask the owner first
 
-- Is the "exam pair" an accepted product rule or an informal exception Mai
-  makes by hand?
-  - I assume it is accepted, so I model it as a real thing: lessons that
-    share a `group_id`, created by an explicit pairing action. The engine
-    then treats a pair as one occupancy block and never flags it.
-  - If it is not accepted, those rows are historical workarounds and I would
-    flag them like any other duplicate.
+- **Exam pairs** — an accepted product rule, or something Mai does by hand?
+  I assume accepted, and model it as lessons that share a `group_id`, created
+  by an explicit pairing action. The engine treats a pair as one occupancy
+  block; the move endpoint refuses to move a paired lesson on its own.
+  If it is *not* accepted, those rows are historical workarounds and I would
+  flag them like any other duplicate.
 
-- Should the historical export be preserved exactly even where it breaks the
-  rules, or should import reject bad rows?
-  - I assume preserve exactly. The brief says the export is what the centre
-    actually ran, so the database loads it as-is and the engine reports the
-    breaches on top.
+- **The historical export** — preserve exactly even where it breaks the
+  rules, or reject bad rows on import? I assume preserve. The database loads
+  the CSV as-is and the engine reports the breaches on top.
 
-- Does a cancelled or no-show booking free the slot?
-  - I assume **cancelled frees** the slot and **no-show does not** (matches
-    the brief's fee rules). So the engine ignores cancelled bookings and
-    keeps no-shows.
+- **Cancelled vs no-show** — does the slot free up? I assume **cancelled
+  frees** it, **no-show does not** (matches the fee rules). The engine ignores
+  cancelled bookings and keeps no-shows.
 
-- New open questions from building this:
-  - Does an exam pair count as **one or two** lessons in a tutor's daily
-    load? I count two.
-  - `L017` is a same-day cancellation by the *tutor* (illness), inside the
-    4-hour window written for *families*. Whose rule applies? Left as a
-    manual-review question; the engine just treats it as cancelled.
-  - Lessons run to 20:30 in the seed (`L027`). Are evening slots normal, or
-    should late lessons be flagged? Not flagged for now.
+- **The 16:00 cut-off** — "the day before" means the day before the *lesson*,
+  and the centre runs on Da Nang time (UTC+7). I assumed both. Also: if a
+  lesson is moved *twice*, is the cut-off judged against the original date or
+  the current one? I use the date the lesson was on when the move was made
+  (that is what the tutor was last told).
+
+- **Tutor-fault cancellation** (`L017`, tutor sick, inside 4h): does the
+  family fee apply? Rule as written only covers a family cancelling. Left as a
+  manual-review question — out of this feature's scope.
+
+- Does an exam pair count as **one or two** lessons in a tutor's daily load?
+  I count two.
 
 ## 2. Where the brief does not fully hold together
 
-- Owner: "if the system allows double-booking, the system is broken."
-  Receptionist: deliberately double-books one tutor/room/slot for exam pairs.
-  - My reading: exam pairs are a **separate, explicit concept** (`group_id`),
-    everything else that collides is a real conflict.
+- Owner: double-booking means "the system is broken." Receptionist:
+  deliberately double-books for exam pairs. Read as: exam pairs are a
+  **separate, explicit concept** (`group_id`); everything else that collides
+  is a real conflict.
 
-- "No tutor more than 6 bookings a day" is stated as a rule, but the business
-  breaks it and the seed data contains a real 7-booking day (`T1`,
-  2026-03-06).
-  - My reading: it is a **warning**, not a hard block. The engine reports it;
-    nothing rejects the data.
+- "No tutor more than 6 a day" is a stated rule the business itself breaks
+  (the seed has a real 7-lesson day). Read as a **warning**, not a hard block.
+  A move that would push a tutor over 6 is allowed but reported as a warning.
 
 ## 3. Assumptions I had to invent
 
-- The export is historical truth. It loads without being "fixed".
-- A room hosts one lesson at a time unless the lessons are a confirmed exam
-  pair.
+- The export is historical truth; it loads without being "fixed".
+- A room hosts one lesson at a time unless the lessons are a confirmed pair.
 - Only non-cancelled lessons count toward tutor load (booked + no-show).
-- The seed CSV has no group column, so I assign the exam-pair `group_id` at
-  import time from the known lesson-id set (`L009`, `L010`), not by reading
-  the note text.
+- The seed CSV has no group column, so the exam-pair `group_id` is assigned
+  at import from a known lesson-id set (`L009`, `L010`), not inferred from the
+  note text.
+- Lessons keep their duration and tutor across a move; only date, start time
+  and room can change.
 
-## 4. Features I can see this tool needing
+## 4. Features I considered
 
-- A "today" board that can be read at a glance.
-- Conflict detection for student, tutor, and room overlaps.
-- Visibility of changes made after the daily cut-off.
-- A cancellation workflow that separates cancelled from no-show.
-- Booking move/reschedule history.
-- Tutor load warnings and enforcement.
+- Validate a new booking at creation time.
+- Read-only "today" dashboard grouped by room.
+- Cancellation handling with fee computation.
+- **Move / reschedule with post-cut-off change tracking.**
+- Tutor-facing mobile schedule view.
+- Bulk import/export tooling.
 
-## 5. The one feature I chose
+## 5. The one feature I chose, and why
 
-**A conflict detection engine, plus a read-only "today" view that surfaces it.**
+**Reschedule a lesson** (`POST /api/lessons/{id}/move`), with an append-only
+event log and post-cut-off change visibility. The board is there to prove it
+works.
 
-The owner's strongest quote is about a student booked into two places with
-nobody knowing. The seed data proves this is real, not hypothetical: a tutor
-in two rooms at once, a student with two tutors at once, a tutor over the
-daily limit. The owner also explicitly asked to "open the laptop and see
-today". One feature covers both: an engine that classifies every clash in the
-schedule, and a board that shows today's rooms with those clashes called out
-at the top.
+Reasons:
 
-This is different from validating a *new* booking (which the repo already
-had): the engine looks at the data that already exists.
+- It is the only candidate that both **changes state** and touches the rule
+  the brief states most carefully — "changes made after 16:00 the day before
+  must be visible as changes, not silent overwrites." A validate-only or
+  read-only feature never engages with it.
+- It exercises the conflict rules for real: the move is refused when it would
+  create a clash, using the **same engine** the board uses to display them —
+  one implementation, not two.
+- `L032`'s note ("moved from Sunday") shows the centre already does this and
+  the current export loses the history. The event log is the fix.
 
-## 6. Data model for this feature
+An earlier version of this repo had a `POST /bookings/validate` endpoint that
+checked a booking and persisted nothing. That was a partial feature sitting
+next to this one, and its overlap check ignored exam pairs. It has been
+removed.
 
-EF Core over SQLite. Three tables.
+## 6. Data model
+
+EF Core over SQLite.
 
 - `Tutors` — `Id`, `Name`, `Subject`, `Phone`
-- `Rooms` — `Id`, `Name` (R1…R6; a table, not a constant, so the board can
-  show empty rooms and the FK is real)
-- `Bookings` — `Id`, `StudentName`, `LessonDate`, `StartTime`,
-  `DurationMinutes`, `TutorId` → `Tutors`, `RoomId` → `Rooms`, `Status`
-  (`Booked` / `Cancelled` / `NoShow`), `GroupId` (nullable — exam pairs),
-  `CancelledAt`, `Note`
+- `Rooms` — `Id`, `Name` (R1…R6; a table so the board shows empty rooms and
+  the move endpoint can validate the target room)
+- `Bookings` (a booked lesson) — `Id`, `StudentName`, `LessonDate`,
+  `StartTime`, `DurationMinutes`, `TutorId` → `Tutors`, `RoomId` → `Rooms`,
+  `Status` (`Booked` / `Cancelled` / `NoShow`), `GroupId` (nullable, exam
+  pairs), `CancelledAt`, `Note`
+- `LessonEvents` — append-only. `Id`, `LessonId` → `Bookings`, `Type`
+  (`Created` / `Moved`), `OccurredAt`, the `From*` / `To*` slot fields for a
+  move, `Reason`, `AfterCutoff`
 
-No `lesson_events` / move-history table: reschedule tracking is out of scope
-for this feature, so I did not build tables it does not use. `GroupId` is a
-plain nullable string; a `lesson_groups` table would only be worth it once
-pairing has its own attributes (price, who authorised it).
+The current-state row plus the event log: a move updates the row **and**
+writes an event, so what a tutor was last told is never lost.
 
-## 7. How I represent a booking cancelled or moved after the tutor was told
+Not built: a `Student` entity (student identity is a name string here — a real
+gap, see §11), a `lesson_groups` table (a bare `group_id` is enough until
+pairing has its own attributes), cancel/no-show intents.
 
-Not in scope for this feature. If I built it, it would be an append-only
-`lesson_events` log rather than in-place edits, so the state a tutor was last
-told is never overwritten. `L032` ("moved from Sunday") shows the export
-itself does not keep this.
+## 7. Representing a change made after the tutor was told
 
-## 8. Which rules I enforce in the database and which in code
+`LessonEvent.AfterCutoff` is set when `now > 16:00 the day before the lesson`
+(`CentreCalendar.ChangeCutoff`). `GET /api/schedule` returns those events for
+the day in a `changes` list and marks the lesson `movedAfterCutoff`; the board
+shows them in a "tell the tutors" panel. Nothing about the change is silent.
 
-### In the database (schema + migration)
+## 8. Which rules live in the database and which in code
 
-- foreign keys `Bookings.TutorId` → `Tutors`, `Bookings.RoomId` → `Rooms`
-- required columns: student, date, start time, duration, tutor, room, status
-- non-unique indexes on `(TutorId, LessonDate)` and `(RoomId, LessonDate)`
+**Database (schema / migration):** foreign keys `Booking.TutorId`,
+`Booking.RoomId`, `LessonEvent.LessonId`; required columns; non-unique indexes
+on `(TutorId, LessonDate)` and `(RoomId, LessonDate)`.
 
-### In code (the engine)
+**Code (the engine + the move service):** tutor / room / student overlap,
+exam-pair exclusion, tutor daily limit, Monday closure, the cut-off
+calculation.
 
-- tutor / room / student overlap
-- exam-pair exclusion (shared `GroupId`)
-- tutor daily limit (> 6)
-- Monday closure
-
-### Why
-
-Even the "physical" rules cannot be database constraints here: the seed
-export already violates them (`L033`/`L034`), so a unique index would make
-the import fail. Overlap is interval math, not a uniqueness check. The daily
-limit is a policy the business itself overrides. So the database guarantees
-referential integrity and required fields; the engine detects everything that
-needs business judgement, on data the database is required to accept.
+**Why:** even the "physical" rules cannot be constraints here — the seed
+export already violates them, so a unique index would fail the import.
+Overlap is interval math, not a uniqueness check. The daily limit is a policy
+the business overrides. The database guarantees referential integrity; the
+engine judges everything that needs interpretation, on data the database is
+required to accept.
 
 ## 9. API shape
 
-- `GET /api/schedule?date=` — one day, grouped by room, with per-lesson
-  conflict codes, tutor load, and the day's conflicts. Defaults to the pinned
-  "today" (2026-03-06).
-- `GET /api/conflicts?from=&to=` — the engine over all stored bookings (or a
-  date range), with an error/warning count.
-- `POST /api/bookings/validate` — pre-existing; checks a proposed booking.
-
-One static page at `/` calls `GET /api/schedule` and renders the board with a
-conflict banner on top. No SPA build, read-only, no forms.
+- `POST /api/lessons/{id}/move` — the intent. One endpoint, one action; no
+  generic `PUT /lessons/{id}`.
+- `GET /api/lessons/{id}/history` — the audit trail.
+- `GET /api/schedule?date=` — the board's data (rooms, conflicts, tutor load,
+  post-cut-off changes).
+- `GET /api/conflicts?from=&to=` — the engine over the whole week.
 
 ## 10. One endpoint I rejected
 
-A generic `PUT /lessons/{id}`. The brief calls this out, and it would let a
-move, a cancellation and a room change all look identical in the data. When
-those land they should be separate intent endpoints
-(`/cancel`, `/move`, `/create-pair`) writing to an event log.
+`PUT /lessons/{id}`. The brief calls it out, and it would make a move, a
+cancellation and a room change indistinguishable in the data. Cancel and
+no-show, when built, get their own intent endpoints writing their own events.
 
-## 11. Reflection
+## 11. What I know is weak
 
-With another week I would build, in order:
-
-- persist a valid booking (the validate endpoint currently only checks)
-- cancellation workflow with the 4-hour fee rule and the tutor-fault case
-- move/reschedule with an append-only event log and post-16:00 change
-  visibility
-- let the board filter to one tutor (the tutor-facing view)
-
-## 12. What I know is weak
-
-- Overlap detection is O(n²) per day. Fine for one centre's week; not for
-  years of history. It would move to an indexed range query or a sweep line.
+- **Student identity is a name string.** Student-overlap matching is
+  `OrdinalIgnoreCase` on that string — two real students with the same name
+  collide. A `Student` table is the right fix.
+- Overlap detection is O(n²) per day. Fine for one centre's week; for years of
+  history it needs an indexed range query or a sweep line.
 - Exam-pair grouping is seeded from a hard-coded id set. Real pairing needs
-  its own endpoint and probably its own table.
-- The board's grid is deliberately plain — I spent the styling budget on the
-  conflict banner, per the brief's steer.
-- No end-to-end test of the HTTP endpoints; the engine and the read service
-  are covered, the wiring is only checked by hand.
+  its own endpoint.
+- No end-to-end HTTP tests — the services and the engine are covered; the
+  route wiring is only exercised by hand.
+- Moving a lesson twice records both moves but the board's `changes` list does
+  not collapse them into a net "here is where it is now".
+
+## 12. Reflection — with another week
+
+- a `Student` entity and real student references
+- cancel / no-show intent endpoints with the 4-hour fee rule and the
+  tutor-fault case
+- move an exam pair as a unit
+- HTTP-level tests with `WebApplicationFactory`
+- let the board filter to one tutor (the tutor-facing view)
 
 ## 13. Where my AI assistant helped
 
 - summarising the brief and its contradictions
 - cross-checking the seed data for every conflict class
-- scaffolding the EF layer, the migration and the test project
+- scaffolding the EF layer, migrations and the test fixtures
 - drafting this document
 
-## 14. One suggestion I threw away, and why I was right to
+## 14. One suggestion I threw away
 
-Enforcing every rule as a hard database constraint (unique indexes on
-tutor/room/slot, a check on the daily limit). It would have been less code,
-but the seed export — which the brief says is what really happened — would
-not load. The whole point of the feature is to report on data that breaks the
-rules, so the rules cannot live where they would reject that data.
+Enforcing every rule as a hard database constraint. Less code, but the seed
+export — which the brief says is what really happened — would not load. The
+feature exists to report on and safely change data that breaks the rules, so
+the rules cannot live where they would reject that data.
