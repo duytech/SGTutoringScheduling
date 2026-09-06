@@ -1,6 +1,6 @@
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Services;
 
-namespace SynergieGlobalTutoringScheduling.Endpoints.Conflicts;
+namespace TutoringScheduling.Endpoints.Conflicts;
 
 public static class ConflictsEndpoint
 {

@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using SynergieGlobalTutoringScheduling.Contracts;
-using SynergieGlobalTutoringScheduling.Data;
-using SynergieGlobalTutoringScheduling.Domain;
+using TutoringScheduling.Contracts;
+using TutoringScheduling.Data;
+using TutoringScheduling.Domain;
 
-namespace SynergieGlobalTutoringScheduling.Services;
+namespace TutoringScheduling.Services;
 
 public sealed class BookingValidationService
 {

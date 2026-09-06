@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using SynergieGlobalTutoringScheduling.Data;
-using SynergieGlobalTutoringScheduling.Endpoints.Bookings;
-using SynergieGlobalTutoringScheduling.Endpoints.Conflicts;
-using SynergieGlobalTutoringScheduling.Endpoints.Schedule;
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Data;
+using TutoringScheduling.Endpoints.Bookings;
+using TutoringScheduling.Endpoints.Conflicts;
+using TutoringScheduling.Endpoints.Schedule;
+using TutoringScheduling.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>

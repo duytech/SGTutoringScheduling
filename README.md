@@ -1,4 +1,4 @@
-# Synergie Global Tutoring Scheduling
+# Tutoring Scheduling
 
 Minimal ASP.NET Core API + a small static room board for **Bright Path Learning
 Centre**. The chosen feature is a **conflict detection engine** over the
@@ -12,7 +12,7 @@ Stack: ASP.NET Core Minimal API, EF Core, SQLite.
 dotnet run
 ```
 
-On start the app applies migrations, creates `synergie.db`, and seeds it from
+On start the app applies migrations, creates `tutoring.db`, and seeds it from
 the CSV export under `seed-data/`. ASP.NET Core prints the local URL; open it
 in a browser for the room board, or call the API directly.
 
@@ -32,7 +32,7 @@ board and `GET /api/schedule` use it when no date is given.
 
 `seed-data/lessons_export.csv` (35 rows, 2026-03-03 … 2026-03-10) and
 `seed-data/tutors.csv` are loaded verbatim, historical conflicts included.
-Delete `synergie.db` to re-seed.
+Delete `tutoring.db` to re-seed.
 
 ## Endpoints
 

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using SynergieGlobalTutoringScheduling.Data;
+using TutoringScheduling.Data;
 
 #nullable disable
 
-namespace SynergieGlobalTutoringScheduling.Data.Migrations
+namespace TutoringScheduling.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260906035115_InitialCreate")]
@@ -20,7 +20,7 @@ namespace SynergieGlobalTutoringScheduling.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
-            modelBuilder.Entity("SynergieGlobalTutoringScheduling.Domain.Booking", b =>
+            modelBuilder.Entity("TutoringScheduling.Domain.Booking", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(16)
@@ -71,7 +71,7 @@ namespace SynergieGlobalTutoringScheduling.Data.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("SynergieGlobalTutoringScheduling.Domain.Room", b =>
+            modelBuilder.Entity("TutoringScheduling.Domain.Room", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(16)
@@ -86,7 +86,7 @@ namespace SynergieGlobalTutoringScheduling.Data.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("SynergieGlobalTutoringScheduling.Domain.Tutor", b =>
+            modelBuilder.Entity("TutoringScheduling.Domain.Tutor", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(16)
@@ -109,15 +109,15 @@ namespace SynergieGlobalTutoringScheduling.Data.Migrations
                     b.ToTable("Tutors");
                 });
 
-            modelBuilder.Entity("SynergieGlobalTutoringScheduling.Domain.Booking", b =>
+            modelBuilder.Entity("TutoringScheduling.Domain.Booking", b =>
                 {
-                    b.HasOne("SynergieGlobalTutoringScheduling.Domain.Room", "Room")
+                    b.HasOne("TutoringScheduling.Domain.Room", "Room")
                         .WithMany()
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SynergieGlobalTutoringScheduling.Domain.Tutor", "Tutor")
+                    b.HasOne("TutoringScheduling.Domain.Tutor", "Tutor")
                         .WithMany()
                         .HasForeignKey("TutorId")
                         .OnDelete(DeleteBehavior.Restrict)

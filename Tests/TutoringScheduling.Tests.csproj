@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SynergieGlobalTutoringScheduling.csproj" />
+    <ProjectReference Include="..\TutoringScheduling.csproj" />
   </ItemGroup>
 
   <ItemGroup>

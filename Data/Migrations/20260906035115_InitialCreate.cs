@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SynergieGlobalTutoringScheduling.Data.Migrations
+namespace TutoringScheduling.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

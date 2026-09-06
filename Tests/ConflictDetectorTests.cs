@@ -1,8 +1,8 @@
-using SynergieGlobalTutoringScheduling.Contracts;
-using SynergieGlobalTutoringScheduling.Domain;
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Contracts;
+using TutoringScheduling.Domain;
+using TutoringScheduling.Services;
 
-namespace SynergieGlobalTutoringScheduling.Tests;
+namespace TutoringScheduling.Tests;
 
 public class ConflictDetectorTests
 {

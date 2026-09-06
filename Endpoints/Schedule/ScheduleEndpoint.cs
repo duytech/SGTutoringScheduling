@@ -1,7 +1,7 @@
 using System.Globalization;
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Services;
 
-namespace SynergieGlobalTutoringScheduling.Endpoints.Schedule;
+namespace TutoringScheduling.Endpoints.Schedule;
 
 public static class ScheduleEndpoint
 {

@@ -1,4 +1,4 @@
-namespace SynergieGlobalTutoringScheduling.Contracts;
+namespace TutoringScheduling.Contracts;
 
 public sealed class ScheduleDayResponse
 {

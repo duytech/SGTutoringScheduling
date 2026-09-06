@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="SynergieGlobalTutoringScheduling.Tests" />
+    <InternalsVisibleTo Include="TutoringScheduling.Tests" />
   </ItemGroup>
 
   <ItemGroup>

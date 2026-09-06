@@ -1,8 +1,8 @@
-using SynergieGlobalTutoringScheduling.Contracts;
-using SynergieGlobalTutoringScheduling.Data;
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Contracts;
+using TutoringScheduling.Data;
+using TutoringScheduling.Services;
 
-namespace SynergieGlobalTutoringScheduling.Tests;
+namespace TutoringScheduling.Tests;
 
 /// <summary>
 /// Runs the detector over the real seed export and pins down every conflict

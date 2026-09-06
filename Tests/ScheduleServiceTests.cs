@@ -1,11 +1,11 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using SynergieGlobalTutoringScheduling.Contracts;
-using SynergieGlobalTutoringScheduling.Data;
-using SynergieGlobalTutoringScheduling.Domain;
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Contracts;
+using TutoringScheduling.Data;
+using TutoringScheduling.Domain;
+using TutoringScheduling.Services;
 
-namespace SynergieGlobalTutoringScheduling.Tests;
+namespace TutoringScheduling.Tests;
 
 public class ScheduleServiceTests : IDisposable
 {

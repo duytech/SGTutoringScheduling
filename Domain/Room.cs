@@ -1,4 +1,4 @@
-namespace SynergieGlobalTutoringScheduling.Domain;
+namespace TutoringScheduling.Domain;
 
 public sealed class Room
 {

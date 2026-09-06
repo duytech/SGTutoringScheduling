@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using SynergieGlobalTutoringScheduling.Domain;
+using TutoringScheduling.Domain;
 
-namespace SynergieGlobalTutoringScheduling.Data;
+namespace TutoringScheduling.Data;
 
 public sealed class AppDbContext : DbContext
 {

@@ -1,7 +1,7 @@
-using SynergieGlobalTutoringScheduling.Contracts;
-using SynergieGlobalTutoringScheduling.Services;
+using TutoringScheduling.Contracts;
+using TutoringScheduling.Services;
 
-namespace SynergieGlobalTutoringScheduling.Endpoints.Bookings;
+namespace TutoringScheduling.Endpoints.Bookings;
 
 public static class ValidateBookingEndpoint
 {

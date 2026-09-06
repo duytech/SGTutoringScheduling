@@ -1,8 +1,8 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
-using SynergieGlobalTutoringScheduling.Domain;
+using TutoringScheduling.Domain;
 
-namespace SynergieGlobalTutoringScheduling.Data;
+namespace TutoringScheduling.Data;
 
 /// <summary>
 /// Loads the centre's schedule from the seed export the first time the

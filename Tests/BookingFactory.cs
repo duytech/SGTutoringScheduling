@@ -1,6 +1,6 @@
-using SynergieGlobalTutoringScheduling.Domain;
+using TutoringScheduling.Domain;
 
-namespace SynergieGlobalTutoringScheduling.Tests;
+namespace TutoringScheduling.Tests;
 
 internal static class BookingFactory
 {

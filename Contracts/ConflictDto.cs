@@ -1,4 +1,4 @@
-namespace SynergieGlobalTutoringScheduling.Contracts;
+namespace TutoringScheduling.Contracts;
 
 /// <summary>
 /// One detected clash in the existing schedule. Errors are physical

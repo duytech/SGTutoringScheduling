@@ -1,7 +1,7 @@
-using SynergieGlobalTutoringScheduling.Contracts;
-using SynergieGlobalTutoringScheduling.Domain;
+using TutoringScheduling.Contracts;
+using TutoringScheduling.Domain;
 
-namespace SynergieGlobalTutoringScheduling.Services;
+namespace TutoringScheduling.Services;
 
 /// <summary>
 /// Scans a set of bookings and reports every clash. Pure function, no data
