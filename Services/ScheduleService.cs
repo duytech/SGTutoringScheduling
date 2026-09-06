@@ -98,8 +98,8 @@ public sealed class ScheduleService
             To = to,
             Summary = new ConflictSummary
             {
-                Errors = conflicts.Count(c => c.Severity == ValidationIssueSeverities.Error),
-                Warnings = conflicts.Count(c => c.Severity == ValidationIssueSeverities.Warning),
+                Errors = conflicts.Count(c => c.Severity == ConflictSeverities.Error),
+                Warnings = conflicts.Count(c => c.Severity == ConflictSeverities.Warning),
             },
             Conflicts = conflicts.ToList(),
         };

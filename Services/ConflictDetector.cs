@@ -25,7 +25,7 @@ public static class ConflictDetector
         conflicts.AddRange(FindMondayConflicts(active));
 
         return conflicts
-            .OrderByDescending(conflict => conflict.Severity == ValidationIssueSeverities.Error)
+            .OrderByDescending(conflict => conflict.Severity == ConflictSeverities.Error)
             .ThenBy(conflict => conflict.Date)
             .ThenBy(conflict => conflict.Code, StringComparer.Ordinal)
             .ThenBy(conflict => string.Join(',', conflict.BookingIds), StringComparer.Ordinal)
@@ -91,7 +91,7 @@ public static class ConflictDetector
             .Select(group => new ConflictDto
             {
                 Code = ConflictCodes.TutorDailyLimit,
-                Severity = ValidationIssueSeverities.Warning,
+                Severity = ConflictSeverities.Warning,
                 Date = group.Key.LessonDate,
                 Message =
                     $"Tutor '{group.Key.TutorId}' has {group.Count()} lessons on " +
@@ -110,7 +110,7 @@ public static class ConflictDetector
             .Select(group => new ConflictDto
             {
                 Code = ConflictCodes.CentreClosedMonday,
-                Severity = ValidationIssueSeverities.Warning,
+                Severity = ConflictSeverities.Warning,
                 Date = group.Key,
                 Message =
                     $"{group.Count()} lesson(s) are scheduled on Monday " +
@@ -148,7 +148,7 @@ public static class ConflictDetector
         return new ConflictDto
         {
             Code = code,
-            Severity = ValidationIssueSeverities.Error,
+            Severity = ConflictSeverities.Error,
             Date = first.LessonDate,
             Message = message,
             BookingIds = new[] { first.Id, second.Id }.OrderBy(id => id, StringComparer.Ordinal).ToList(),

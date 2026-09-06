@@ -22,8 +22,8 @@ public class SeedDataConflictTests
     {
         var conflicts = DetectSeedConflicts();
 
-        Assert.Equal(2, conflicts.Count(c => c.Severity == ValidationIssueSeverities.Error));
-        Assert.Equal(2, conflicts.Count(c => c.Severity == ValidationIssueSeverities.Warning));
+        Assert.Equal(2, conflicts.Count(c => c.Severity == ConflictSeverities.Error));
+        Assert.Equal(2, conflicts.Count(c => c.Severity == ConflictSeverities.Warning));
     }
 
     [Fact]

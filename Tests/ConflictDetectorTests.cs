@@ -46,7 +46,7 @@ public class ConflictDetectorTests
 
         var conflict = Assert.Single(conflicts);
         Assert.Equal(ConflictCodes.TutorDoubleBooked, conflict.Code);
-        Assert.Equal(ValidationIssueSeverities.Error, conflict.Severity);
+        Assert.Equal(ConflictSeverities.Error, conflict.Severity);
         Assert.Equal(new[] { "L033", "L034" }, conflict.BookingIds);
         Assert.Equal("T1", conflict.TutorId);
     }
@@ -131,7 +131,7 @@ public class ConflictDetectorTests
 
         var conflict = Assert.Single(ConflictDetector.Detect(bookings));
         Assert.Equal(ConflictCodes.TutorDailyLimit, conflict.Code);
-        Assert.Equal(ValidationIssueSeverities.Warning, conflict.Severity);
+        Assert.Equal(ConflictSeverities.Warning, conflict.Severity);
         Assert.Equal(7, conflict.BookingIds.Count);
         Assert.Equal("T1", conflict.TutorId);
     }
@@ -161,7 +161,7 @@ public class ConflictDetectorTests
 
         var conflict = Assert.Single(ConflictDetector.Detect(bookings));
         Assert.Equal(ConflictCodes.CentreClosedMonday, conflict.Code);
-        Assert.Equal(ValidationIssueSeverities.Warning, conflict.Severity);
+        Assert.Equal(ConflictSeverities.Warning, conflict.Severity);
         Assert.Contains("L032", conflict.BookingIds);
     }
 
@@ -177,7 +177,7 @@ public class ConflictDetectorTests
 
         var conflicts = ConflictDetector.Detect(bookings);
 
-        Assert.Equal(ValidationIssueSeverities.Error, conflicts[0].Severity);
-        Assert.Equal(ValidationIssueSeverities.Warning, conflicts[^1].Severity);
+        Assert.Equal(ConflictSeverities.Error, conflicts[0].Severity);
+        Assert.Equal(ConflictSeverities.Warning, conflicts[^1].Severity);
     }
 }
