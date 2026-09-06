@@ -11,6 +11,13 @@ builder.Services.AddScoped<BookingValidationService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+    await DbSeeder.SeedAsync(db, app.Environment.ContentRootPath);
+}
+
 app.MapGet("/", () => "Hello World!");
 app.MapValidateBookingEndpoint();
 
