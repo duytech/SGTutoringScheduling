@@ -44,8 +44,48 @@ public static class DbSeeder
         db.Rooms.AddRange(rooms);
         db.Tutors.AddRange(tutors);
         db.Bookings.AddRange(bookings);
+        db.LessonEvents.AddRange(BuildHistory(bookings));
 
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static IEnumerable<LessonEvent> BuildHistory(IReadOnlyList<Booking> bookings)
+    {
+        foreach (var booking in bookings)
+        {
+            // The export has no creation timestamps; assume each lesson was
+            // booked about a week ahead, well before any cut-off.
+            yield return new LessonEvent
+            {
+                LessonId = booking.Id,
+                Type = LessonEventType.Created,
+                OccurredAt = new DateTimeOffset(
+                    booking.LessonDate.AddDays(-7), new TimeOnly(12, 0), CentreCalendar.TimeZoneOffset),
+            };
+        }
+
+        // L032's note says it was moved from Sunday, but the export keeps no
+        // record of the original booking. Reconstruct that as an event so the
+        // history is not lost -- this is the gap the feature closes.
+        var movedFromSunday = bookings.FirstOrDefault(booking => booking.Id == "L032");
+        if (movedFromSunday is not null)
+        {
+            yield return new LessonEvent
+            {
+                LessonId = movedFromSunday.Id,
+                Type = LessonEventType.Moved,
+                OccurredAt = new DateTimeOffset(
+                    new DateOnly(2026, 3, 4), new TimeOnly(14, 0), CentreCalendar.TimeZoneOffset),
+                FromDate = new DateOnly(2026, 3, 8),
+                FromStartTime = movedFromSunday.StartTime,
+                FromRoomId = movedFromSunday.RoomId,
+                ToDate = movedFromSunday.LessonDate,
+                ToStartTime = movedFromSunday.StartTime,
+                ToRoomId = movedFromSunday.RoomId,
+                Reason = "moved from Sunday at the family's request",
+                AfterCutoff = false,
+            };
+        }
     }
 
     private static List<Room> BuildRooms()

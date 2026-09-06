@@ -16,6 +16,8 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<Booking> Bookings => Set<Booking>();
 
+    public DbSet<LessonEvent> LessonEvents => Set<LessonEvent>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Tutor>(entity =>
@@ -67,6 +69,28 @@ public sealed class AppDbContext : DbContext
             // Those are detected in code, not blocked by the schema.
             entity.HasIndex(booking => new { booking.TutorId, booking.LessonDate });
             entity.HasIndex(booking => new { booking.RoomId, booking.LessonDate });
+        });
+
+        modelBuilder.Entity<LessonEvent>(entity =>
+        {
+            entity.HasKey(lessonEvent => lessonEvent.Id);
+
+            entity.Property(lessonEvent => lessonEvent.Type)
+                .HasConversion<string>()
+                .HasMaxLength(16)
+                .IsRequired();
+
+            entity.Property(lessonEvent => lessonEvent.OccurredAt).IsRequired();
+            entity.Property(lessonEvent => lessonEvent.FromRoomId).HasMaxLength(16);
+            entity.Property(lessonEvent => lessonEvent.ToRoomId).HasMaxLength(16);
+            entity.Property(lessonEvent => lessonEvent.Reason).HasMaxLength(500);
+
+            entity.HasOne(lessonEvent => lessonEvent.Lesson)
+                .WithMany()
+                .HasForeignKey(lessonEvent => lessonEvent.LessonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(lessonEvent => lessonEvent.LessonId);
         });
     }
 }

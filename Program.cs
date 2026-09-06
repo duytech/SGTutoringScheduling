@@ -7,6 +7,7 @@ using TutoringScheduling.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddSingleton<IClock, PinnedClock>();
 builder.Services.AddScoped<ScheduleService>();
 
 var app = builder.Build();
