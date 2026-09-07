@@ -2,7 +2,7 @@ using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Data;
+namespace TutoringScheduling.Infrastructure.Persistence;
 
 /// <summary>
 /// Loads the centre's schedule from the seed export the first time the

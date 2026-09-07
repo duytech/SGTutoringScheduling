@@ -1,9 +1,8 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Application.Abstractions;
-using TutoringScheduling.Composition;
-using TutoringScheduling.Data;
 using TutoringScheduling.Domain;
+using TutoringScheduling.Infrastructure.Persistence;
 
 namespace TutoringScheduling.Tests.Support;
 

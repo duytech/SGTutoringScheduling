@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TutoringScheduling.Data;
+using TutoringScheduling.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace TutoringScheduling.Data.Migrations
+namespace TutoringScheduling.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260906072036_AddLessonEvents")]

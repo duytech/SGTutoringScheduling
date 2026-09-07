@@ -1,17 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Application;
-using TutoringScheduling.Application.Abstractions;
-using TutoringScheduling.Composition;
-using TutoringScheduling.Data;
 using TutoringScheduling.Endpoints.Conflicts;
 using TutoringScheduling.Endpoints.Lessons;
 using TutoringScheduling.Endpoints.Schedule;
+using TutoringScheduling.Infrastructure;
+using TutoringScheduling.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
-builder.Services.AddSingleton<IClock, PinnedClock>();
-builder.Services.AddScoped<IScheduleStore, ScheduleStore>();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ScheduleService>();
 builder.Services.AddScoped<MoveLessonService>();
 

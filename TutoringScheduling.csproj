@@ -12,15 +12,16 @@
     <EmbeddedResource Remove="Tests/**" />
   </ItemGroup>
 
-  <!-- Domain and Application are their own projects now; don't also compile them here. -->
+  <!-- Each layer is its own project now; don't also compile them here. -->
   <ItemGroup>
     <Compile Remove="Domain/**" />
     <Compile Remove="Application/**" />
+    <Compile Remove="Infrastructure/**" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="Domain/TutoringScheduling.Domain.csproj" />
     <ProjectReference Include="Application/TutoringScheduling.Application.csproj" />
+    <ProjectReference Include="Infrastructure/TutoringScheduling.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,8 +33,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
   </ItemGroup>
 
 </Project>

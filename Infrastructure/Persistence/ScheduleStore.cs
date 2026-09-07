@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Application.Abstractions;
-using TutoringScheduling.Data;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Composition;
+namespace TutoringScheduling.Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core implementation of the application's persistence port. This is the

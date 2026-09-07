@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Data;
+namespace TutoringScheduling.Infrastructure.Persistence;
 
 public sealed class AppDbContext : DbContext
 {

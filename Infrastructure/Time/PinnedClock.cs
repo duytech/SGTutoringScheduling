@@ -1,8 +1,9 @@
 using System.Globalization;
+using Microsoft.Extensions.Configuration;
 using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Composition;
+namespace TutoringScheduling.Infrastructure.Time;
 
 /// <summary>
 /// "Now" is pinned to a value inside the seeded week (config key
