@@ -1,4 +1,4 @@
-using TutoringScheduling.Services;
+using TutoringScheduling.Application;
 
 namespace TutoringScheduling.Endpoints.Lessons;
 

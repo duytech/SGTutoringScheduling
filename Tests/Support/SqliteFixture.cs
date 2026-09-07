@@ -1,5 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using TutoringScheduling.Application.Abstractions;
+using TutoringScheduling.Composition;
 using TutoringScheduling.Data;
 using TutoringScheduling.Domain;
 
@@ -33,6 +35,9 @@ public abstract class SqliteFixture : IDisposable
     }
 
     protected AppDbContext Db { get; }
+
+    /// <summary>The persistence port backed by this fixture's database.</summary>
+    protected IScheduleStore Store => new ScheduleStore(Db);
 
     protected void Add(params Booking[] bookings)
     {

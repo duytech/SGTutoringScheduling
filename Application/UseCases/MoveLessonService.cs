@@ -1,11 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using TutoringScheduling.Application;
 using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Application.Contracts;
-using TutoringScheduling.Data;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Services;
+namespace TutoringScheduling.Application;
 
 public enum MoveOutcome
 {
@@ -40,12 +37,12 @@ public sealed class MoveResult
 /// </summary>
 public sealed class MoveLessonService
 {
-    private readonly AppDbContext _db;
+    private readonly IScheduleStore _store;
     private readonly IClock _clock;
 
-    public MoveLessonService(AppDbContext db, IClock clock)
+    public MoveLessonService(IScheduleStore store, IClock clock)
     {
-        _db = db;
+        _store = store;
         _clock = clock;
     }
 
@@ -59,9 +56,7 @@ public sealed class MoveLessonService
             return MoveResult.Reject("toDate and toStartTime are required.");
         }
 
-        var lesson = await _db.Bookings
-            .Include(booking => booking.Tutor)
-            .FirstOrDefaultAsync(booking => booking.Id == lessonId, cancellationToken);
+        var lesson = await _store.FindBookingAsync(lessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -94,14 +89,14 @@ public sealed class MoveLessonService
             return MoveResult.Reject($"The centre is closed on {request.ToDate:dddd dd MMM}; pick another day.");
         }
 
-        if (!await _db.Rooms.AnyAsync(room => room.Id == toRoomId, cancellationToken))
+        if (!await _store.RoomExistsAsync(toRoomId, cancellationToken))
         {
             return MoveResult.Reject($"Room '{toRoomId}' does not exist.");
         }
 
-        var targetDay = await _db.Bookings
-            .Where(booking => booking.LessonDate == request.ToDate && booking.Id != lessonId)
-            .ToListAsync(cancellationToken);
+        var targetDay = (await _store.GetBookingsForDayAsync(request.ToDate, cancellationToken))
+            .Where(booking => booking.Id != lessonId)
+            .ToList();
 
         var proposed = CloneInto(lesson, request.ToDate, request.ToStartTime, toRoomId);
         targetDay.Add(proposed);
@@ -137,8 +132,7 @@ public sealed class MoveLessonService
             AfterCutoff = _clock.Now > CentreCalendar.ChangeCutoff(from.LessonDate),
         };
 
-        _db.LessonEvents.Add(lessonEvent);
-        await _db.SaveChangesAsync(cancellationToken);
+        await _store.RecordMoveAsync(lesson, lessonEvent, cancellationToken);
 
         return MoveResult.Ok(new MoveLessonResponse
         {

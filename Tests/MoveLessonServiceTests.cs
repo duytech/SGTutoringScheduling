@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Domain;
-using TutoringScheduling.Services;
+using TutoringScheduling.Application;
 using TutoringScheduling.Tests.Support;
 
 namespace TutoringScheduling.Tests;
@@ -10,7 +10,7 @@ public class MoveLessonServiceTests : SqliteFixture
 {
     // Friday 2026-03-06, 09:00 centre time.
     private MoveLessonService ServiceAt(string now = "2026-03-06T09:00:00") =>
-        new(Db, new FixedClock(now));
+        new(Store, new FixedClock(now));
 
     private static MoveLessonRequest To(string date, string start, string? room = null, string? reason = null) =>
         new()

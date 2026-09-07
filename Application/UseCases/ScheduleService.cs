@@ -1,10 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using TutoringScheduling.Application;
+using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Application.Contracts;
-using TutoringScheduling.Data;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Services;
+namespace TutoringScheduling.Application;
 
 /// <summary>
 /// Read side of the schedule: runs the conflict engine over stored bookings
@@ -12,33 +10,24 @@ namespace TutoringScheduling.Services;
 /// </summary>
 public sealed class ScheduleService
 {
-    private readonly AppDbContext _db;
+    private readonly IScheduleStore _store;
 
-    public ScheduleService(AppDbContext db)
+    public ScheduleService(IScheduleStore store)
     {
-        _db = db;
+        _store = store;
     }
 
     public async Task<ScheduleDayResponse> GetDayAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
     {
-        var rooms = await _db.Rooms
-            .OrderBy(room => room.Id)
-            .ToListAsync(cancellationToken);
-
-        var bookings = await _db.Bookings
-            .Include(booking => booking.Tutor)
-            .Where(booking => booking.LessonDate == date)
-            .ToListAsync(cancellationToken);
+        var rooms = await _store.GetRoomsAsync(cancellationToken);
+        var bookings = await _store.GetBookingsForDayAsync(date, cancellationToken);
 
         var conflicts = ConflictDetector.Detect(bookings);
         var codesByBookingId = MapConflictCodesByBooking(conflicts);
 
-        var cutoffMoves = await _db.LessonEvents
-            .Where(lessonEvent => lessonEvent.Type == LessonEventType.Moved && lessonEvent.AfterCutoff)
-            .Where(lessonEvent => lessonEvent.ToDate == date || lessonEvent.FromDate == date)
-            .ToListAsync(cancellationToken);
+        var cutoffMoves = await _store.GetCutoffMovesTouchingDayAsync(date, cancellationToken);
 
         var landedLate = cutoffMoves
             .Where(lessonEvent => lessonEvent.ToDate == date)
@@ -94,9 +83,7 @@ public sealed class ScheduleService
         string lessonId,
         CancellationToken cancellationToken = default)
     {
-        var lesson = await _db.Bookings
-            .Include(booking => booking.Tutor)
-            .FirstOrDefaultAsync(booking => booking.Id == lessonId, cancellationToken);
+        var lesson = await _store.FindBookingAsync(lessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -104,9 +91,7 @@ public sealed class ScheduleService
         }
 
         // SQLite cannot sort by DateTimeOffset, so order once materialised.
-        var events = await _db.LessonEvents
-            .Where(lessonEvent => lessonEvent.LessonId == lessonId)
-            .ToListAsync(cancellationToken);
+        var events = await _store.GetLessonEventsAsync(lessonId, cancellationToken);
 
         return new LessonHistoryResponse
         {
@@ -124,19 +109,7 @@ public sealed class ScheduleService
         DateOnly? to,
         CancellationToken cancellationToken = default)
     {
-        var query = _db.Bookings.AsQueryable();
-
-        if (from is { } fromDate)
-        {
-            query = query.Where(booking => booking.LessonDate >= fromDate);
-        }
-
-        if (to is { } toDate)
-        {
-            query = query.Where(booking => booking.LessonDate <= toDate);
-        }
-
-        var bookings = await query.ToListAsync(cancellationToken);
+        var bookings = await _store.GetBookingsInRangeAsync(from, to, cancellationToken);
         var conflicts = ConflictDetector.Detect(bookings);
 
         return new ConflictsResponse
