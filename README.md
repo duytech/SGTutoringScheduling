@@ -8,20 +8,25 @@ change in an append-only log, and makes a change past the daily cut-off
 **visible as a change** rather than a silent overwrite. A read-only room board
 shows the result.
 
-Stack: ASP.NET Core Minimal API, EF Core, SQLite — laid out as a four-project
+Stack: ASP.NET Core Minimal API, EF Core, SQL Server — laid out as a four-project
 Clean Architecture solution (see [Layout](#layout)).
 
 ## Run it
+
+Prerequisite: a local SQL Server instance reachable at `localhost` with Windows
+authentication (the connection string lives in `Api/appsettings.json` under
+`ConnectionStrings:Default`).
 
 ```bash
 dotnet run --project Api
 ```
 
-On start the app applies migrations, creates `Api/tutoring.db`, and seeds it
-from the CSV export under `seed-data/` (35 lessons, week of 2026-03-03 … 03-10),
-loaded verbatim including the historical conflicts. It also writes a `Created`
-event per lesson and reconstructs `L032`'s "moved from Sunday" history, which
-the export itself lost. Delete `Api/tutoring.db` to re-seed.
+On start the app applies migrations, creates the `TutoringScheduling` database,
+and seeds it from the CSV export under `seed-data/` (34 lessons, week of
+2026-03-03 … 03-10), loaded verbatim including the historical conflicts. It also
+writes a `Created` event per lesson and reconstructs `L032`'s "moved from Sunday"
+history, which the export itself lost. Drop the `TutoringScheduling` database to
+re-seed.
 
 Open the printed URL for the board, or call the API directly.
 
@@ -29,8 +34,10 @@ Open the printed URL for the board, or call the API directly.
 dotnet test
 ```
 
-runs the conflict-engine and service tests (unit + SQLite-backed) plus the
-architecture test that enforces the layer boundaries.
+runs the conflict-engine and service tests (unit + SQL Server-backed) plus the
+architecture test that enforces the layer boundaries. The SQL Server-backed
+tests each create and drop a throwaway `TutoringScheduling_Test_*` database on
+`localhost`, so `dotnet test` also needs that instance reachable.
 
 ### "Now"
 
@@ -113,7 +120,7 @@ Infrastructure/  EF Core implementation of the ports. References Application.
 Api/             composition root: Minimal API endpoints, static board, startup.
                  Endpoints/   one file per route
                  wwwroot/     the static board
-Tests/           xUnit; SqliteFixture + FixedClock back the service tests;
+Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
                  ArchitectureTests enforces the dependency rule
 ```
 
