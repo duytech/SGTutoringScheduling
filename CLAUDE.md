@@ -12,6 +12,14 @@ several partial ones.
 Any stack I'm fastest in — see `brief-notes.md` for the candidate's default
 (ASP.NET Minimal API + EF Core + SQLite) unless told otherwise in chat.
 
+The code is a four-project Clean Architecture solution
+(`Api → Infrastructure → Application → Domain`; dependencies point inward only).
+The use-case services reach persistence through `IScheduleStore`, defined in
+`Application` and implemented in `Infrastructure` — they never see a `DbContext`.
+Run with `dotnet run --project Api`; `dotnet ef` uses
+`--project Infrastructure --startup-project Api`. Layer map and rationale:
+`DECISIONS.md` §15.
+
 ## Pinned "today"
 Use 2026-03-06 (or another date inside 2026-03-03..2026-03-10) as "today" —
 never the real system clock. State which date is used in the README.
@@ -36,6 +44,10 @@ never the real system clock. State which date is used in the README.
   (exam pair) first.
 - Don't build UI polish, auth, or CRUD-everything unless asked — see
   "What I leave broken" conventions in `brief-notes.md`.
+- Don't reference `Microsoft.EntityFrameworkCore` or `Microsoft.AspNetCore`
+  from the `Domain` or `Application` projects — `Tests/ArchitectureTests` fails
+  the build if you do. Don't collapse `IScheduleStore` back into a direct
+  `AppDbContext` dependency; it's a deliberate choice (`DECISIONS.md` §15).
 
 ## Deliverables expected
 - `DECISIONS.md` at repo root (four sections: questions for the owner,
