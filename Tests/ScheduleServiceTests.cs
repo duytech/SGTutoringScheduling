@@ -4,7 +4,7 @@ using TutoringScheduling.Tests.Support;
 
 namespace TutoringScheduling.Tests;
 
-public class ScheduleServiceTests : SqliteFixture
+public class ScheduleServiceTests : SqlServerFixture
 {
     private ScheduleService Service => new(Store);
 

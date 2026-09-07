@@ -86,7 +86,11 @@ removed.
 
 ## 6. Data model
 
-EF Core over SQLite.
+EF Core over SQL Server (localhost, Windows auth). Originally SQLite; switched
+on request. The provider swap was mechanical — the model uses only
+provider-agnostic mappings (`HasConversion<string>()` for enums; `DateOnly`/
+`TimeOnly` map to `date`/`time`), so only the package, `UseSqlServer(...)`, the
+connection string and the regenerated `InitialCreate` migration changed.
 
 - `Tutors` — `Id`, `Name`, `Subject`, `Phone`
 - `Rooms` — `Id`, `Name` (R1…R6; a table so the board shows empty rooms and
@@ -209,7 +213,7 @@ that return materialised domain objects — no `IQueryable` crosses the boundary
 
 `CLAUDE.md` says *"don't build a repository interface unless tests need it"*,
 and by that yardstick `IScheduleStore` is more than the feature strictly
-requires — the SQLite-backed tests worked fine against a concrete `DbContext`.
+requires — the SQL Server-backed tests worked fine against a concrete `DbContext`.
 It is here deliberately, to make the dependency rule real rather than a
 convention, at the cost of one interface and one implementation class. If the
 goal were minimal footage for the reschedule feature alone, the services would
