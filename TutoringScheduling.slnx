@@ -2,5 +2,8 @@
   <Folder Name="/Tests/">
     <Project Path="Tests/TutoringScheduling.Tests.csproj" />
   </Folder>
-  <Project Path="TutoringScheduling.csproj" />
+  <Project Path="Domain/TutoringScheduling.Domain.csproj" />
+  <Project Path="Application/TutoringScheduling.Application.csproj" />
+  <Project Path="Infrastructure/TutoringScheduling.Infrastructure.csproj" />
+  <Project Path="Api/TutoringScheduling.Api.csproj" />
 </Solution>

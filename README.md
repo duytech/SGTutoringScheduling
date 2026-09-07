@@ -8,19 +8,20 @@ change in an append-only log, and makes a change past the daily cut-off
 **visible as a change** rather than a silent overwrite. A read-only room board
 shows the result.
 
-Stack: ASP.NET Core Minimal API, EF Core, SQLite.
+Stack: ASP.NET Core Minimal API, EF Core, SQLite — laid out as a four-project
+Clean Architecture solution (see [Layout](#layout)).
 
 ## Run it
 
 ```bash
-dotnet run
+dotnet run --project Api
 ```
 
-On start the app applies migrations, creates `tutoring.db`, and seeds it from
-the CSV export under `seed-data/` (35 lessons, week of 2026-03-03 … 03-10),
+On start the app applies migrations, creates `Api/tutoring.db`, and seeds it
+from the CSV export under `seed-data/` (35 lessons, week of 2026-03-03 … 03-10),
 loaded verbatim including the historical conflicts. It also writes a `Created`
 event per lesson and reconstructs `L032`'s "moved from Sunday" history, which
-the export itself lost. Delete `tutoring.db` to re-seed.
+the export itself lost. Delete `Api/tutoring.db` to re-seed.
 
 Open the printed URL for the board, or call the API directly.
 
@@ -28,7 +29,8 @@ Open the printed URL for the board, or call the API directly.
 dotnet test
 ```
 
-runs the conflict-engine and service tests (unit + SQLite-backed).
+runs the conflict-engine and service tests (unit + SQLite-backed) plus the
+architecture test that enforces the layer boundaries.
 
 ### "Now"
 
@@ -95,11 +97,32 @@ two warnings (tutor `T1` over limit on 2026-03-06, Monday lesson `L032`).
 
 ## Layout
 
+Four projects, dependencies pointing inward only
+(`Api → Infrastructure → Application → Domain`):
+
 ```
-Domain/       entities, the centre calendar (UTC+7, 16:00 cut-off)
-Data/         AppDbContext, migrations, CSV seeder
-Services/     ConflictDetector (pure), MoveLessonService, ScheduleService, IClock
-Endpoints/    one file per route
-Tests/        xUnit; SqliteFixture + FixedClock back the service tests
-wwwroot/      the static board
+Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
+Application/     use cases + API contracts. References Domain only.
+                 UseCases/    MoveLessonService, ScheduleService
+                 Abstractions/ IClock, IScheduleStore (the persistence port)
+                 Contracts/   request/response DTOs
+                 ConflictDetector (pure), LessonMapper
+Infrastructure/  EF Core implementation of the ports. References Application.
+                 Persistence/ AppDbContext, migrations, ScheduleStore, CSV seeder
+                 Time/        PinnedClock
+Api/             composition root: Minimal API endpoints, static board, startup.
+                 Endpoints/   one file per route
+                 wwwroot/     the static board
+Tests/           xUnit; SqliteFixture + FixedClock back the service tests;
+                 ArchitectureTests enforces the dependency rule
+```
+
+The use-case layer never sees a `DbContext` — it goes through `IScheduleStore`,
+defined in `Application` and implemented in `Infrastructure`. `AddApplication()`
+and `AddInfrastructure(config)` wire each layer up in `Api/Program.cs`.
+
+EF Core migrations (startup project is `Api`):
+
+```bash
+dotnet ef migrations add <Name> --project Infrastructure --startup-project Api
 ```

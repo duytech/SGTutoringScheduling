@@ -1,6 +1,6 @@
-using TutoringScheduling.Contracts;
-using TutoringScheduling.Data;
-using TutoringScheduling.Services;
+using TutoringScheduling.Application;
+using TutoringScheduling.Application.Contracts;
+using TutoringScheduling.Infrastructure.Persistence;
 
 namespace TutoringScheduling.Tests;
 

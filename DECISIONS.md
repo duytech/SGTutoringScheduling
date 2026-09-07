@@ -181,3 +181,37 @@ Enforcing every rule as a hard database constraint. Less code, but the seed
 export — which the brief says is what really happened — would not load. The
 feature exists to report on and safely change data that breaks the rules, so
 the rules cannot live where they would reject that data.
+
+## 15. Layering (Clean Architecture)
+
+The code is split into four projects, each depending only on the ones inside
+it:
+
+| Layer | Project | Depends on | Holds |
+| --- | --- | --- | --- |
+| Entities | `Domain` | — | `Booking`, `LessonEvent`, `Room`, `Tutor`, `CentreCalendar`, the status/limit rules |
+| Use cases | `Application` | Domain | `MoveLessonService`, `ScheduleService`, `ConflictDetector`, the DTO contracts, and the ports `IClock` / `IScheduleStore` |
+| Frameworks | `Infrastructure` | Application | `AppDbContext`, migrations, `ScheduleStore` (EF Core), `PinnedClock`, the CSV seeder |
+| Composition | `Api` | Application, Infrastructure | Minimal API endpoints, the static board, `Program.cs` |
+
+`Tests/ArchitectureTests` makes the rule enforceable: it fails if `Application`
+ever references EF Core or ASP.NET.
+
+### The persistence port
+
+The use-case services previously took `AppDbContext` directly. They now depend
+on **`IScheduleStore`**, an interface owned by `Application` with
+intention-revealing methods (`GetBookingsForDayAsync`, `RecordMoveAsync`, …)
+that return materialised domain objects — no `IQueryable` crosses the boundary.
+`Infrastructure` supplies the one EF Core implementation.
+
+### Trade-off against the brief
+
+`CLAUDE.md` says *"don't build a repository interface unless tests need it"*,
+and by that yardstick `IScheduleStore` is more than the feature strictly
+requires — the SQLite-backed tests worked fine against a concrete `DbContext`.
+It is here deliberately, to make the dependency rule real rather than a
+convention, at the cost of one interface and one implementation class. If the
+goal were minimal footage for the reschedule feature alone, the services would
+keep taking `AppDbContext` and the solution would stay a single project with
+folders.
