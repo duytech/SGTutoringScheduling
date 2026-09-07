@@ -4,13 +4,6 @@ using TutoringScheduling.Domain;
 
 namespace TutoringScheduling.Application;
 
-public enum MoveOutcome
-{
-    Applied,
-    LessonNotFound,
-    Rejected,
-}
-
 public sealed class MoveResult
 {
     public required MoveOutcome Outcome { get; init; }
