@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The innermost layer: entities and fixed business rules. Deliberately has no
+    project or package references - nothing here may depend on EF Core, ASP.NET,
+    or the DTO contracts.
+  -->
+  <PropertyGroup>
+    <RootNamespace>TutoringScheduling.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>
