@@ -4,7 +4,7 @@ using TutoringScheduling.Tests.Support;
 
 namespace TutoringScheduling.Tests;
 
-public class LessonHistoryTests : SqliteFixture
+public class LessonHistoryTests : SqlServerFixture
 {
     [Fact]
     public async Task History_ListsSeededAndAppliedEventsOldestFirst()

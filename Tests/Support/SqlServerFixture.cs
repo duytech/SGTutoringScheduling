@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Domain;
@@ -7,21 +6,22 @@ using TutoringScheduling.Infrastructure.Persistence;
 namespace TutoringScheduling.Tests.Support;
 
 /// <summary>
-/// A throwaway SQLite database (real schema, in memory) seeded with six rooms
-/// and three tutors. One instance per test.
+/// A throwaway SQL Server database (real schema, on localhost) seeded with six
+/// rooms and three tutors. One instance per test; dropped on dispose.
 /// </summary>
-public abstract class SqliteFixture : IDisposable
+public abstract class SqlServerFixture : IDisposable
 {
-    private readonly SqliteConnection _connection;
+    private const string ServerConnectionString =
+        "Server=localhost;Trusted_Connection=True;TrustServerCertificate=True";
 
-    protected SqliteFixture()
+    private readonly string _databaseName = $"TutoringScheduling_Test_{Guid.NewGuid():N}";
+
+    protected SqlServerFixture()
     {
-        _connection = new SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
         Db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite(_connection)
+            .UseSqlServer($"{ServerConnectionString};Database={_databaseName}")
             .Options);
+        Db.Database.EnsureDeleted();
         Db.Database.EnsureCreated();
 
         Db.Rooms.AddRange(Enumerable.Range(1, 6)
@@ -47,8 +47,8 @@ public abstract class SqliteFixture : IDisposable
 
     public void Dispose()
     {
+        Db.Database.EnsureDeleted();
         Db.Dispose();
-        _connection.Dispose();
         GC.SuppressFinalize(this);
     }
 }

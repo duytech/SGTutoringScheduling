@@ -6,7 +6,7 @@ using TutoringScheduling.Tests.Support;
 
 namespace TutoringScheduling.Tests;
 
-public class MoveLessonServiceTests : SqliteFixture
+public class MoveLessonServiceTests : SqlServerFixture
 {
     // Friday 2026-03-06, 09:00 centre time.
     private MoveLessonService ServiceAt(string now = "2026-03-06T09:00:00") =>
