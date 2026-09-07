@@ -12,13 +12,15 @@
     <EmbeddedResource Remove="Tests/**" />
   </ItemGroup>
 
-  <!-- The Domain layer is its own project now; don't also compile it here. -->
+  <!-- Domain and Application are their own projects now; don't also compile them here. -->
   <ItemGroup>
     <Compile Remove="Domain/**" />
+    <Compile Remove="Application/**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="Domain/TutoringScheduling.Domain.csproj" />
+    <ProjectReference Include="Application/TutoringScheduling.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

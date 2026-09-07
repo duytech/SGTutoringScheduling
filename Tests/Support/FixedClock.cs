@@ -1,6 +1,6 @@
 using System.Globalization;
 using TutoringScheduling.Domain;
-using TutoringScheduling.Services;
+using TutoringScheduling.Application.Abstractions;
 
 namespace TutoringScheduling.Tests.Support;
 

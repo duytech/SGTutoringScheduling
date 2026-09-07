@@ -1,4 +1,4 @@
-namespace TutoringScheduling.Contracts;
+namespace TutoringScheduling.Application.Contracts;
 
 /// <summary>
 /// One detected clash in the existing schedule. Errors are physical

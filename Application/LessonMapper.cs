@@ -1,9 +1,9 @@
-using TutoringScheduling.Contracts;
+using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Services;
+namespace TutoringScheduling.Application;
 
-internal static class LessonMapper
+public static class LessonMapper
 {
     public static LessonDto ToDto(
         Booking booking,

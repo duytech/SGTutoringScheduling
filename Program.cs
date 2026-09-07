@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using TutoringScheduling.Application.Abstractions;
+using TutoringScheduling.Composition;
 using TutoringScheduling.Data;
 using TutoringScheduling.Endpoints.Conflicts;
 using TutoringScheduling.Endpoints.Lessons;

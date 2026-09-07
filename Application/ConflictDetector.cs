@@ -1,7 +1,7 @@
-using TutoringScheduling.Contracts;
+using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Services;
+namespace TutoringScheduling.Application;
 
 /// <summary>
 /// Scans a set of bookings and reports every clash. Pure function, no data

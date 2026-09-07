@@ -1,3 +1,4 @@
+using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Services;
 
 namespace TutoringScheduling.Endpoints.Schedule;

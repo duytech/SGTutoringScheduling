@@ -1,4 +1,4 @@
-namespace TutoringScheduling.Contracts;
+namespace TutoringScheduling.Application.Contracts;
 
 public static class ConflictSeverities
 {

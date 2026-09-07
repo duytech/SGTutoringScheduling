@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TutoringScheduling.Contracts;
+using TutoringScheduling.Application;
+using TutoringScheduling.Application.Abstractions;
+using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Data;
 using TutoringScheduling.Domain;
 

@@ -1,14 +1,8 @@
 using System.Globalization;
+using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Domain;
 
-namespace TutoringScheduling.Services;
-
-public interface IClock
-{
-    DateTimeOffset Now { get; }
-
-    DateOnly Today => DateOnly.FromDateTime(Now.DateTime);
-}
+namespace TutoringScheduling.Composition;
 
 /// <summary>
 /// "Now" is pinned to a value inside the seeded week (config key
