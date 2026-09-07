@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TutoringScheduling.csproj" />
+    <ProjectReference Include="..\Application\TutoringScheduling.Application.csproj" />
+    <ProjectReference Include="..\Infrastructure\TutoringScheduling.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

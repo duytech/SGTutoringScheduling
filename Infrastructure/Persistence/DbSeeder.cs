@@ -27,7 +27,7 @@ public static class DbSeeder
 
     public static async Task SeedAsync(
         AppDbContext db,
-        string contentRootPath,
+        string seedRootPath,
         CancellationToken cancellationToken = default)
     {
         if (await db.Bookings.AnyAsync(cancellationToken))
@@ -35,7 +35,7 @@ public static class DbSeeder
             return;
         }
 
-        var seedDirectory = Path.Combine(contentRootPath, "seed-data");
+        var seedDirectory = Path.Combine(seedRootPath, "seed-data");
 
         var rooms = BuildRooms();
         var tutors = ReadTutors(Path.Combine(seedDirectory, "tutors.csv"));

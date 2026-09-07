@@ -1,6 +1,6 @@
 using TutoringScheduling.Application;
 
-namespace TutoringScheduling.Endpoints.Conflicts;
+namespace TutoringScheduling.Api.Endpoints.Conflicts;
 
 public static class ConflictsEndpoint
 {

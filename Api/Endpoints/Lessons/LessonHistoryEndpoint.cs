@@ -1,6 +1,6 @@
 using TutoringScheduling.Application;
 
-namespace TutoringScheduling.Endpoints.Lessons;
+namespace TutoringScheduling.Api.Endpoints.Lessons;
 
 public static class LessonHistoryEndpoint
 {

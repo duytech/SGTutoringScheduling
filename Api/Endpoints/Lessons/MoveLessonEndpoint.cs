@@ -1,7 +1,7 @@
 using TutoringScheduling.Application;
 using TutoringScheduling.Application.Contracts;
 
-namespace TutoringScheduling.Endpoints.Lessons;
+namespace TutoringScheduling.Api.Endpoints.Lessons;
 
 public static class MoveLessonEndpoint
 {

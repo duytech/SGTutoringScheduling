@@ -1,7 +1,7 @@
 using TutoringScheduling.Application;
 using TutoringScheduling.Application.Abstractions;
 
-namespace TutoringScheduling.Endpoints.Schedule;
+namespace TutoringScheduling.Api.Endpoints.Schedule;
 
 public static class ScheduleEndpoint
 {
