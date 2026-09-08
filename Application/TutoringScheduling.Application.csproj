@@ -3,7 +3,8 @@
   <!--
     Use-case layer: the API contracts, the conflict engine and the scheduling
     services. References the Domain only - no EF Core, no ASP.NET. Persistence
-    is reached through the IScheduleStore port defined here and implemented in
+    is reached through the persistence ports (IBookingStore, IRoomStore,
+    ILessonEventStore, IMoveRecorder) defined here and implemented in
     Infrastructure.
   -->
   <PropertyGroup>
