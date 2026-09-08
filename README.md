@@ -111,11 +111,12 @@ Four projects, dependencies pointing inward only
 Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
 Application/     use cases + API contracts. References Domain only.
                  UseCases/    MoveLessonService, ScheduleService
-                 Abstractions/ IClock, IScheduleStore (the persistence port)
+                 Abstractions/ IClock + the persistence ports
+                              (IBookingStore, IRoomStore, ILessonEventStore, IMoveRecorder)
                  Contracts/   request/response DTOs
                  ConflictDetector (pure), LessonMapper
 Infrastructure/  EF Core implementation of the ports. References Application.
-                 Persistence/ AppDbContext, migrations, ScheduleStore, CSV seeder
+                 Persistence/ AppDbContext, migrations, the EF Core stores, CSV seeder
                  Time/        PinnedClock
 Api/             composition root: Minimal API endpoints, static board, startup.
                  Endpoints/   one file per route
@@ -124,7 +125,8 @@ Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
                  ArchitectureTests enforces the dependency rule
 ```
 
-The use-case layer never sees a `DbContext` — it goes through `IScheduleStore`,
+The use-case layer never sees a `DbContext` — it goes through the persistence
+ports (`IBookingStore`, `IRoomStore`, `ILessonEventStore`, `IMoveRecorder`),
 defined in `Application` and implemented in `Infrastructure`. `AddApplication()`
 and `AddInfrastructure(config)` wire each layer up in `Api/Program.cs`.
 

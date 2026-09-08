@@ -14,8 +14,9 @@ Any stack I'm fastest in — see `brief-notes.md` for the candidate's default
 
 The code is a four-project Clean Architecture solution
 (`Api → Infrastructure → Application → Domain`; dependencies point inward only).
-The use-case services reach persistence through `IScheduleStore`, defined in
-`Application` and implemented in `Infrastructure` — they never see a `DbContext`.
+The use-case services reach persistence through the per-aggregate ports in
+`Application/Abstractions` (`IBookingStore`, `IRoomStore`, `ILessonEventStore`,
+`IMoveRecorder`), implemented in `Infrastructure` — they never see a `DbContext`.
 Run with `dotnet run --project Api`; `dotnet ef` uses
 `--project Infrastructure --startup-project Api`. Layer map and rationale:
 `DECISIONS.md` §15.
@@ -46,8 +47,8 @@ never the real system clock. State which date is used in the README.
   "What I leave broken" conventions in `brief-notes.md`.
 - Don't reference `Microsoft.EntityFrameworkCore` or `Microsoft.AspNetCore`
   from the `Domain` or `Application` projects — `Tests/ArchitectureTests` fails
-  the build if you do. Don't collapse `IScheduleStore` back into a direct
-  `AppDbContext` dependency; it's a deliberate choice (`DECISIONS.md` §15).
+  the build if you do. Don't collapse the persistence ports back into a direct
+  `AppDbContext` dependency; they're a deliberate choice (`DECISIONS.md` §15).
 
 ## Deliverables expected
 - `DECISIONS.md` at repo root (four sections: questions for the owner,

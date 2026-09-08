@@ -11,7 +11,7 @@ public static class DependencyInjection
 {
     /// <summary>
     /// Registers the SQL Server database, the pinned clock and the EF Core-backed
-    /// implementation of <see cref="IScheduleStore"/>.
+    /// implementations of the persistence ports.
     /// </summary>
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services, IConfiguration configuration)
@@ -20,7 +20,10 @@ public static class DependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("Default")));
 
         services.AddSingleton<IClock, PinnedClock>();
-        services.AddScoped<IScheduleStore, ScheduleStore>();
+        services.AddScoped<IBookingStore, BookingStore>();
+        services.AddScoped<IRoomStore, RoomStore>();
+        services.AddScoped<ILessonEventStore, LessonEventStore>();
+        services.AddScoped<IMoveRecorder, MoveRecorder>();
 
         return services;
     }

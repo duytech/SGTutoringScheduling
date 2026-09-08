@@ -30,12 +30,17 @@ public sealed class MoveResult
 /// </summary>
 public sealed class MoveLessonService
 {
-    private readonly IScheduleStore _store;
+    private readonly IBookingStore _bookings;
+    private readonly IRoomStore _rooms;
+    private readonly IMoveRecorder _moves;
     private readonly IClock _clock;
 
-    public MoveLessonService(IScheduleStore store, IClock clock)
+    public MoveLessonService(
+        IBookingStore bookings, IRoomStore rooms, IMoveRecorder moves, IClock clock)
     {
-        _store = store;
+        _bookings = bookings;
+        _rooms = rooms;
+        _moves = moves;
         _clock = clock;
     }
 
@@ -49,7 +54,7 @@ public sealed class MoveLessonService
             return MoveResult.Reject("toDate and toStartTime are required.");
         }
 
-        var lesson = await _store.FindBookingAsync(lessonId, cancellationToken);
+        var lesson = await _bookings.FindBookingAsync(lessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -82,12 +87,12 @@ public sealed class MoveLessonService
             return MoveResult.Reject($"The centre is closed on {request.ToDate:dddd dd MMM}; pick another day.");
         }
 
-        if (!await _store.RoomExistsAsync(toRoomId, cancellationToken))
+        if (!await _rooms.RoomExistsAsync(toRoomId, cancellationToken))
         {
             return MoveResult.Reject($"Room '{toRoomId}' does not exist.");
         }
 
-        var targetDay = (await _store.GetBookingsForDayAsync(request.ToDate, cancellationToken))
+        var targetDay = (await _bookings.GetBookingsForDayAsync(request.ToDate, cancellationToken))
             .Where(booking => booking.Id != lessonId)
             .ToList();
 
@@ -125,7 +130,7 @@ public sealed class MoveLessonService
             AfterCutoff = _clock.Now > CentreCalendar.ChangeCutoff(from.LessonDate),
         };
 
-        await _store.RecordMoveAsync(lesson, lessonEvent, cancellationToken);
+        await _moves.RecordMoveAsync(lesson, lessonEvent, cancellationToken);
 
         return MoveResult.Ok(new MoveLessonResponse
         {

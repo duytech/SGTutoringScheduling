@@ -10,7 +10,7 @@ public class MoveLessonServiceTests : SqlServerFixture
 {
     // Friday 2026-03-06, 09:00 centre time.
     private MoveLessonService ServiceAt(string now = "2026-03-06T09:00:00") =>
-        new(Store, new FixedClock(now));
+        NewMover(new FixedClock(now));
 
     private static MoveLessonRequest To(string date, string start, string? room = null, string? reason = null) =>
         new()

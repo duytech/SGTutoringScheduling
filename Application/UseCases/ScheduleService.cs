@@ -10,24 +10,28 @@ namespace TutoringScheduling.Application;
 /// </summary>
 public sealed class ScheduleService
 {
-    private readonly IScheduleStore _store;
+    private readonly IBookingStore _bookings;
+    private readonly IRoomStore _rooms;
+    private readonly ILessonEventStore _events;
 
-    public ScheduleService(IScheduleStore store)
+    public ScheduleService(IBookingStore bookings, IRoomStore rooms, ILessonEventStore events)
     {
-        _store = store;
+        _bookings = bookings;
+        _rooms = rooms;
+        _events = events;
     }
 
     public async Task<ScheduleDayResponse> GetDayAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
     {
-        var rooms = await _store.GetRoomsAsync(cancellationToken);
-        var bookings = await _store.GetBookingsForDayAsync(date, cancellationToken);
+        var rooms = await _rooms.GetRoomsAsync(cancellationToken);
+        var bookings = await _bookings.GetBookingsForDayAsync(date, cancellationToken);
 
         var conflicts = ConflictDetector.Detect(bookings);
         var codesByBookingId = MapConflictCodesByBooking(conflicts);
 
-        var cutoffMoves = await _store.GetCutoffMovesTouchingDayAsync(date, cancellationToken);
+        var cutoffMoves = await _events.GetCutoffMovesTouchingDayAsync(date, cancellationToken);
 
         var landedLate = cutoffMoves
             .Where(lessonEvent => lessonEvent.ToDate == date)
@@ -83,7 +87,7 @@ public sealed class ScheduleService
         string lessonId,
         CancellationToken cancellationToken = default)
     {
-        var lesson = await _store.FindBookingAsync(lessonId, cancellationToken);
+        var lesson = await _bookings.FindBookingAsync(lessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -91,7 +95,7 @@ public sealed class ScheduleService
         }
 
         // SQLite cannot sort by DateTimeOffset, so order once materialised.
-        var events = await _store.GetLessonEventsAsync(lessonId, cancellationToken);
+        var events = await _events.GetLessonEventsAsync(lessonId, cancellationToken);
 
         return new LessonHistoryResponse
         {
@@ -109,7 +113,7 @@ public sealed class ScheduleService
         DateOnly? to,
         CancellationToken cancellationToken = default)
     {
-        var bookings = await _store.GetBookingsInRangeAsync(from, to, cancellationToken);
+        var bookings = await _bookings.GetBookingsInRangeAsync(from, to, cancellationToken);
         var conflicts = ConflictDetector.Detect(bookings);
 
         return new ConflictsResponse
