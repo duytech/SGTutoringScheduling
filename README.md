@@ -43,8 +43,10 @@ tests each create and drop a throwaway `TutoringScheduling_Test_*` database on
 
 The brief pins the clock to a value inside the seeded week, never the real
 system clock. It is **2026-03-06 09:00 (+07:00)**, set by `Schedule:Now` in
-`appsettings.json`, and drives both the board's default day and the
-"after 16:00 the day before" cut-off.
+`appsettings.json`, and drives the "after 16:00 the day before" cut-off in
+`MoveLessonService`. The read endpoints take an explicit `date`; the board's
+default day is a client-side constant (`PINNED_TODAY` in `wwwroot/index.html`),
+set to the same date.
 
 ## The feature — reschedule a lesson
 
@@ -80,7 +82,8 @@ The lesson's current state plus its event log, oldest first.
 One day, grouped by room (all six, empty ones included). Each lesson carries
 its conflict codes and a `movedAfterCutoff` flag; the response also has a
 per-tutor load line, the day's conflicts, and a `changes` list of
-post-cut-off moves touching that day. `date` defaults to the pinned today.
+post-cut-off moves touching that day. `date` is **required** — a request
+without it returns `400`.
 
 ### `GET /api/conflicts?from=&to=`
 
