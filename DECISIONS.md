@@ -117,6 +117,11 @@ pairing has its own attributes), cancel/no-show intents.
 the day in a `changes` list and marks the lesson `movedAfterCutoff`; the board
 shows them in a "tell the tutors" panel. Nothing about the change is silent.
 
+`IClock` (`Application/Abstractions`) exists only for this write-side rule —
+`now` there must be authoritative, not something a client asserts. The read
+endpoint `GET /api/schedule` takes an explicit `date` and never touches the
+clock; the board's default day is a client-side constant.
+
 ## 8. Which rules live in the database and which in code
 
 **Database (schema / migration):** foreign keys `Booking.TutorId`,
