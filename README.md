@@ -30,6 +30,20 @@ re-seed.
 
 Open the printed URL for the board, or call the API directly.
 
+### React UI (`frontend/`)
+
+The board also has a React 18 + TypeScript (Vite) port under `frontend/` — same
+interface and logic as the static page. Run the API as above, then:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+and open http://localhost:5173 (Vite proxies `/api` to the API). The original
+static board at `wwwroot/index.html` is unchanged. See `frontend/README.md`.
+
 ```bash
 dotnet test
 ```
@@ -45,8 +59,8 @@ The brief pins the clock to a value inside the seeded week, never the real
 system clock. It is **2026-03-06 09:00 (+07:00)**, set by `Schedule:Now` in
 `appsettings.json`, and drives the "after 16:00 the day before" cut-off in
 `MoveLessonService`. The read endpoints take an explicit `date`; the board's
-default day is a client-side constant (`PINNED_TODAY` in `wwwroot/index.html`),
-set to the same date.
+default day is a client-side constant (`PINNED_TODAY` in `wwwroot/index.html`,
+and `frontend/src/api/schedule.ts` for the React UI), set to the same date.
 
 ## The feature — reschedule a lesson
 
@@ -124,6 +138,7 @@ Infrastructure/  EF Core implementation of the ports. References Application.
 Api/             composition root: Minimal API endpoints, static board, startup.
                  Endpoints/   one file per route
                  wwwroot/     the static board
+frontend/        React 18 + TS (Vite) port of the board; dev-proxies /api
 Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
                  ArchitectureTests enforces the dependency rule
 ```
