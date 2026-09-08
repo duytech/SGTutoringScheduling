@@ -19,10 +19,10 @@ public class LessonHistoryTests : SqlServerFixture
         Db.SaveChanges();
         Db.ChangeTracker.Clear();
 
-        await new MoveLessonService(Store, new FixedClock("2026-03-06T09:00:00"))
+        await NewMover(new FixedClock("2026-03-06T09:00:00"))
             .MoveAsync("L1", new() { ToDate = new DateOnly(2026, 3, 10), ToStartTime = new TimeOnly(11, 0) });
 
-        var history = await new ScheduleService(Store).GetLessonHistoryAsync("L1");
+        var history = await NewScheduleService().GetLessonHistoryAsync("L1");
 
         Assert.NotNull(history);
         Assert.Equal(new[] { "Created", "Moved" }, history!.Events.Select(e => e.Type));
@@ -32,6 +32,6 @@ public class LessonHistoryTests : SqlServerFixture
     [Fact]
     public async Task History_ForAnUnknownLesson_IsNull()
     {
-        Assert.Null(await new ScheduleService(Store).GetLessonHistoryAsync("nope"));
+        Assert.Null(await NewScheduleService().GetLessonHistoryAsync("nope"));
     }
 }

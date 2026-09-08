@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TutoringScheduling.Application;
 using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Domain;
 using TutoringScheduling.Infrastructure.Persistence;
@@ -35,8 +36,13 @@ public abstract class SqlServerFixture : IDisposable
 
     protected AppDbContext Db { get; }
 
-    /// <summary>The persistence port backed by this fixture's database.</summary>
-    protected IScheduleStore Store => new ScheduleStore(Db);
+    /// <summary>A read-side <see cref="ScheduleService"/> backed by this fixture's database.</summary>
+    protected ScheduleService NewScheduleService() =>
+        new(new BookingStore(Db), new RoomStore(Db), new LessonEventStore(Db));
+
+    /// <summary>A <see cref="MoveLessonService"/> backed by this fixture's database.</summary>
+    protected MoveLessonService NewMover(IClock clock) =>
+        new(new BookingStore(Db), new RoomStore(Db), new MoveRecorder(Db), clock);
 
     protected void Add(params Booking[] bookings)
     {
