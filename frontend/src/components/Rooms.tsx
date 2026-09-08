@@ -8,7 +8,7 @@ export function Rooms({ rooms }: { rooms: RoomSchedule[] }) {
         <div className="room" key={room.roomId}>
           <h2>{room.roomName}</h2>
           {room.lessons.length > 0 ? (
-            room.lessons.map((l) => <Lesson key={l.id} l={l} />)
+            room.lessons.map((lesson) => <Lesson key={lesson.id} lesson={lesson} />)
           ) : (
             <div className="empty">no lessons</div>
           )}
