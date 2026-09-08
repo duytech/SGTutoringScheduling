@@ -5,7 +5,7 @@ import type { ScheduleDayResponse } from "./types";
 export const PINNED_TODAY = "2026-03-06";
 
 export async function fetchSchedule(date: string): Promise<ScheduleDayResponse> {
-  const res = await fetch(`/api/schedule?date=${date || PINNED_TODAY}`);
-  if (!res.ok) throw new Error(`schedule request failed: ${res.status}`);
-  return (await res.json()) as ScheduleDayResponse;
+  const response = await fetch(`/api/schedule?date=${date || PINNED_TODAY}`);
+  if (!response.ok) throw new Error(`schedule request failed: ${response.status}`);
+  return (await response.json()) as ScheduleDayResponse;
 }
