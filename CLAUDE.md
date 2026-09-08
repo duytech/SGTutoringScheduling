@@ -49,6 +49,9 @@ never the real system clock. State which date is used in the README.
   from the `Domain` or `Application` projects — `Tests/ArchitectureTests` fails
   the build if you do. Don't collapse the persistence ports back into a direct
   `AppDbContext` dependency; they're a deliberate choice (`DECISIONS.md` §15).
+- Don't commit or push directly to `main`. Always cut a feature branch,
+  push it, and open a PR — even for small changes. Sync `main` only by
+  pulling after the PR merges.
 
 ## Deliverables expected
 - `DECISIONS.md` at repo root (four sections: questions for the owner,
