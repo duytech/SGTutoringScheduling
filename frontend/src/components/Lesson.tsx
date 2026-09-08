@@ -1,20 +1,20 @@
 import type { Lesson as LessonModel } from "../api/types";
-import { fmt } from "../lib/format";
+import { formatTime } from "../lib/format";
 
 export function Lesson({ lesson }: { lesson: LessonModel }) {
   const clash = lesson.conflictCodes.length > 0;
   const badges = [
-    ...lesson.conflictCodes.map((code) => ({ cls: "badge", text: code })),
-    ...(lesson.groupId ? [{ cls: "badge pair", text: "exam pair" }] : []),
-    ...(lesson.movedAfterCutoff ? [{ cls: "badge moved", text: "moved late" }] : []),
-    ...(lesson.status !== "Booked" ? [{ cls: "badge cancelled", text: lesson.status }] : []),
+    ...lesson.conflictCodes.map((code) => ({ className: "badge", text: code })),
+    ...(lesson.groupId ? [{ className: "badge pair", text: "exam pair" }] : []),
+    ...(lesson.movedAfterCutoff ? [{ className: "badge moved", text: "moved late" }] : []),
+    ...(lesson.status !== "Booked" ? [{ className: "badge cancelled", text: lesson.status }] : []),
   ];
-  const cls = clash ? "clash" : lesson.movedAfterCutoff ? "moved-late" : "";
+  const rowClassName = clash ? "clash" : lesson.movedAfterCutoff ? "moved-late" : "";
 
   return (
-    <div className={`lesson ${cls}`.trimEnd()}>
+    <div className={`lesson ${rowClassName}`.trimEnd()}>
       <span className="time">
-        {fmt(lesson.startTime)}–{fmt(lesson.endTime)}
+        {formatTime(lesson.startTime)}–{formatTime(lesson.endTime)}
       </span>
       <div className="who">
         {lesson.studentName} · {lesson.tutorName}
@@ -22,7 +22,7 @@ export function Lesson({ lesson }: { lesson: LessonModel }) {
       {badges.length > 0 && (
         <div className="badges">
           {badges.map((badge, index) => (
-            <span key={index} className={badge.cls}>
+            <span key={index} className={badge.className}>
               {badge.text}
             </span>
           ))}

@@ -1,5 +1,5 @@
 import type { LessonEvent } from "../api/types";
-import { fmt } from "../lib/format";
+import { formatTime } from "../lib/format";
 
 export function Changes({ events, day }: { events: LessonEvent[]; day: string }) {
   if (!events || !events.length) return null;
@@ -7,8 +7,8 @@ export function Changes({ events, day }: { events: LessonEvent[]; day: string })
     <div id="changes">
       <h2>Changes since 16:00 the day before — tell the tutors</h2>
       {events.map((event, index) => {
-        const from = `${event.fromDate === day ? "" : event.fromDate + " "}${fmt(event.fromStartTime)} ${event.fromRoomId}`;
-        const to = `${event.toDate === day ? "" : event.toDate + " "}${fmt(event.toStartTime)} ${event.toRoomId}`;
+        const from = `${event.fromDate === day ? "" : event.fromDate + " "}${formatTime(event.fromStartTime)} ${event.fromRoomId}`;
+        const to = `${event.toDate === day ? "" : event.toDate + " "}${formatTime(event.toStartTime)} ${event.toRoomId}`;
         let detail: string;
         if (event.fromDate === day && event.toDate === day) detail = `re-slotted ${from.trim()} → ${to.trim()}`;
         else if (event.toDate === day) detail = `moved here from ${from.trim()}`;
