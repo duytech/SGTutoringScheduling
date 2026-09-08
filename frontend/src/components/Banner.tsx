@@ -12,10 +12,13 @@ export function Banner({ conflicts }: { conflicts: Conflict[] }) {
   }
   return (
     <div id="banner">
-      {conflicts.map((c, i) => (
-        <div className={`conflict ${c.severity === "warning" ? "warn" : ""}`.trimEnd()} key={i}>
-          <span className="tag">{c.code}</span> — {c.message}
-          <div className="ids">bookings: {c.bookingIds.join(", ")}</div>
+      {conflicts.map((conflict, index) => (
+        <div
+          className={`conflict ${conflict.severity === "warning" ? "warn" : ""}`.trimEnd()}
+          key={index}
+        >
+          <span className="tag">{conflict.code}</span> — {conflict.message}
+          <div className="ids">bookings: {conflict.bookingIds.join(", ")}</div>
         </div>
       ))}
     </div>

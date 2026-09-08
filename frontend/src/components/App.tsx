@@ -15,11 +15,11 @@ export function App() {
     let cancelled = false;
     setStatus("loading…");
     fetchSchedule(date)
-      .then((d) => {
+      .then((day) => {
         if (cancelled) return;
-        setData(d);
-        setStatus(d.isMonday ? "centre closed (Monday)" : "");
-        if (d.date !== date) setDate(d.date);
+        setData(day);
+        setStatus(day.isMonday ? "centre closed (Monday)" : "");
+        if (day.date !== date) setDate(day.date);
       })
       .catch(() => {
         if (!cancelled) setStatus("failed to load");
@@ -37,7 +37,7 @@ export function App() {
         <input
           type="date"
           value={date}
-          onChange={(e) => setDate(e.target.value || PINNED_TODAY)}
+          onChange={(event) => setDate(event.target.value || PINNED_TODAY)}
         />
         <span className="muted">{status}</span>
       </header>
