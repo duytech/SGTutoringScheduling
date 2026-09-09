@@ -8,6 +8,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<ScheduleService>();
+        services.AddScoped<TutorService>();
         services.AddScoped<MoveLessonService>();
 
         return services;

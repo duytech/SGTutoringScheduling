@@ -1,6 +1,5 @@
 using TutoringScheduling.Application.Abstractions;
 using TutoringScheduling.Application.Contracts;
-using TutoringScheduling.Domain;
 
 namespace TutoringScheduling.Application;
 
@@ -55,26 +54,11 @@ public sealed class ScheduleService
             })
             .ToList();
 
-        var tutorLoads = bookings
-            .Where(booking => booking.Status != BookingStatus.Cancelled)
-            .GroupBy(booking => (booking.TutorId, TutorName: booking.Tutor.Name))
-            .OrderBy(group => group.Key.TutorId, StringComparer.Ordinal)
-            .Select(group => new TutorLoadDto
-            {
-                TutorId = group.Key.TutorId,
-                TutorName = group.Key.TutorName,
-                LessonCount = group.Count(),
-                Limit = BookingLimits.MaxBookingsPerTutorPerDay,
-                OverLimit = group.Count() > BookingLimits.MaxBookingsPerTutorPerDay,
-            })
-            .ToList();
-
         return new ScheduleDayResponse
         {
             Date = date,
             IsMonday = date.DayOfWeek == DayOfWeek.Monday,
             Rooms = roomSchedules,
-            TutorLoads = tutorLoads,
             Conflicts = conflicts.ToList(),
             Changes = cutoffMoves
                 .OrderBy(lessonEvent => lessonEvent.OccurredAt)

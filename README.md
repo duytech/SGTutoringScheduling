@@ -94,10 +94,14 @@ The lesson's current state plus its event log, oldest first.
 ### `GET /api/schedule?date=YYYY-MM-DD`
 
 One day, grouped by room (all six, empty ones included). Each lesson carries
-its conflict codes and a `movedAfterCutoff` flag; the response also has a
-per-tutor load line, the day's conflicts, and a `changes` list of
-post-cut-off moves touching that day. `date` is **required** — a request
-without it returns `400`.
+its conflict codes and a `movedAfterCutoff` flag; the response also has the
+day's conflicts and a `changes` list of post-cut-off moves touching that day.
+`date` is **required** — a request without it returns `400`.
+
+### `GET /api/tutors/loads?date=YYYY-MM-DD`
+
+Per-tutor lesson count for the day and an `overLimit` flag for anyone over the
+soft 6-lessons-a-day limit. `date` is **required** (`400` without it).
 
 ### `GET /api/conflicts?from=&to=`
 
@@ -127,7 +131,7 @@ Four projects, dependencies pointing inward only
 ```
 Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
 Application/     use cases + API contracts. References Domain only.
-                 UseCases/    MoveLessonService, ScheduleService
+                 UseCases/    MoveLessonService, ScheduleService, TutorService
                  Abstractions/ IClock + the persistence ports
                               (IBookingStore, IRoomStore, ILessonEventStore, IMoveRecorder)
                  Contracts/   request/response DTOs

@@ -40,6 +40,9 @@ public abstract class SqlServerFixture : IDisposable
     protected ScheduleService NewScheduleService() =>
         new(new BookingStore(Db), new RoomStore(Db), new LessonEventStore(Db));
 
+    /// <summary>A read-side <see cref="TutorService"/> backed by this fixture's database.</summary>
+    protected TutorService NewTutorService() => new(new BookingStore(Db));
+
     /// <summary>A <see cref="MoveLessonService"/> backed by this fixture's database.</summary>
     protected MoveLessonService NewMover(IClock clock) =>
         new(new BookingStore(Db), new RoomStore(Db), new MoveRecorder(Db), clock);

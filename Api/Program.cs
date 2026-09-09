@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TutoringScheduling.Api.Endpoints.Conflicts;
 using TutoringScheduling.Api.Endpoints.Lessons;
 using TutoringScheduling.Api.Endpoints.Schedule;
+using TutoringScheduling.Api.Endpoints.Tutors;
 using TutoringScheduling.Application;
 using TutoringScheduling.Infrastructure;
 using TutoringScheduling.Infrastructure.Persistence;
@@ -24,6 +25,7 @@ app.UseStaticFiles();
 
 app.MapConflictsEndpoint();
 app.MapScheduleEndpoint();
+app.MapTutorsEndpoint();
 app.MapMoveLessonEndpoint();
 app.MapLessonHistoryEndpoint();
 

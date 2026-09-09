@@ -37,7 +37,8 @@ page still serves at `http://localhost:5243/`).
 
 ## Structure
 
-- `src/api/` — DTO types (`types.ts`) and the schedule fetch (`schedule.ts`)
+- `src/api/` — DTO types (`types.ts`) and the read fetches (`schedule.ts`,
+  `tutors.ts`)
 - `src/lib/format.ts` — `fmt()` time helper (`"HH:mm:ss"` -> `"HH:mm"`)
 - `src/components/` — one component per original render function: `App`, `Banner`,
   `Changes`, `Loads`, `Rooms`, `Lesson`
