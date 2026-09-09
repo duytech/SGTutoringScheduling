@@ -8,7 +8,7 @@ public static class LessonHistoryEndpoint
     {
         endpoints.MapGet("/api/lessons/{id}/history", async (
             string id,
-            ScheduleService schedule,
+            IScheduleService schedule,
             CancellationToken cancellationToken) =>
         {
             var response = await schedule.GetLessonHistoryAsync(id, cancellationToken);

@@ -23,12 +23,8 @@ public sealed class MoveResult
         new() { Outcome = MoveOutcome.Applied, Applied = response };
 }
 
-/// <summary>
-/// Reschedules a single lesson. Runs the one conflict engine against the
-/// target slot, applies the change to the current-state row, and records it
-/// as an event so a move made after the cut-off stays visible as a change.
-/// </summary>
-public sealed class MoveLessonService
+/// <inheritdoc cref="IMoveLessonService"/>
+public sealed class MoveLessonService : IMoveLessonService
 {
     private readonly IBookingStore _bookings;
     private readonly IRoomStore _rooms;

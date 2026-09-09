@@ -132,6 +132,7 @@ Four projects, dependencies pointing inward only
 Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
 Application/     use cases + API contracts. References Domain only.
                  UseCases/    MoveLessonService, ScheduleService, TutorService
+                              (each behind an I…Service interface; DI maps it)
                  Abstractions/ IClock + the persistence ports
                               (IBookingStore, IRoomStore, ILessonEventStore, IMoveRecorder)
                  Contracts/   request/response DTOs

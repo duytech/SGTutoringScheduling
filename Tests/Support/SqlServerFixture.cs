@@ -36,16 +36,16 @@ public abstract class SqlServerFixture : IDisposable
 
     protected AppDbContext Db { get; }
 
-    /// <summary>A read-side <see cref="ScheduleService"/> backed by this fixture's database.</summary>
-    protected ScheduleService NewScheduleService() =>
-        new(new BookingStore(Db), new RoomStore(Db), new LessonEventStore(Db));
+    /// <summary>A read-side <see cref="IScheduleService"/> backed by this fixture's database.</summary>
+    protected IScheduleService NewScheduleService() =>
+        new ScheduleService(new BookingStore(Db), new RoomStore(Db), new LessonEventStore(Db));
 
-    /// <summary>A read-side <see cref="TutorService"/> backed by this fixture's database.</summary>
-    protected TutorService NewTutorService() => new(new BookingStore(Db));
+    /// <summary>A read-side <see cref="ITutorService"/> backed by this fixture's database.</summary>
+    protected ITutorService NewTutorService() => new TutorService(new BookingStore(Db));
 
-    /// <summary>A <see cref="MoveLessonService"/> backed by this fixture's database.</summary>
-    protected MoveLessonService NewMover(IClock clock) =>
-        new(new BookingStore(Db), new RoomStore(Db), new MoveRecorder(Db), clock);
+    /// <summary>An <see cref="IMoveLessonService"/> backed by this fixture's database.</summary>
+    protected IMoveLessonService NewMover(IClock clock) =>
+        new MoveLessonService(new BookingStore(Db), new RoomStore(Db), new MoveRecorder(Db), clock);
 
     protected void Add(params Booking[] bookings)
     {
