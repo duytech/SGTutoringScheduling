@@ -201,8 +201,17 @@ the rules cannot live where they would reject that data.
 
 ## 15. Layering (Clean Architecture)
 
-The code is split into four projects, each depending only on the ones inside
-it:
+The whole .NET side lives under `backend/` (`frontend/` and the docs stay at the
+repo root):
+
+```
+backend/
+  TutoringScheduling.slnx, Directory.Build.props
+  seed-data/       lessons_export.csv, tutors.csv
+  Domain/ Application/ Infrastructure/ Api/ Tests/
+```
+
+It is split into four projects, each depending only on the ones inside it:
 
 | Layer | Project | Depends on | Holds |
 | --- | --- | --- | --- |
