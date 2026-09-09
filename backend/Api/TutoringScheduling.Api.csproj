@@ -6,6 +6,8 @@
   -->
   <PropertyGroup>
     <RootNamespace>TutoringScheduling.Api</RootNamespace>
+    <!-- JSON API only: no wwwroot, no static files. -->
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
 
   <ItemGroup>
