@@ -229,13 +229,23 @@ intention-revealing methods that return materialised domain objects — no
 forced every consumer to depend on the whole surface, so it was split along the
 aggregates it touched.
 
+### The use-case services
+
+The three use-case services front an interface too — `IScheduleService`,
+`ITutorService`, `IMoveLessonService`, each beside its implementation in
+`Application/UseCases`. DI maps interface → class; the API endpoints and the
+service tests depend on the interface. This is consistency with the ports rather
+than necessity: there is one implementation of each, and the tests exercise the
+concrete class directly. It buys a clean seam for a decorator (logging, caching,
+metrics) and keeps every consumer depending on a contract, not a class.
+
 ### Trade-off against the brief
 
 `CLAUDE.md` says *"don't build a repository interface unless tests need it"*,
 and by that yardstick these ports are more than the feature strictly
 requires — the SQL Server-backed tests worked fine against a concrete `DbContext`.
-They are here deliberately, to make the dependency rule real rather than a
-convention, at the cost of four small interfaces and their implementations. If
-the goal were minimal footage for the reschedule feature alone, the services
-would keep taking `AppDbContext` and the solution would stay a single project
-with folders.
+The ports and the service interfaces are here deliberately, to make the
+dependency rule real rather than a convention, at the cost of a handful of
+one-implementation interfaces. If the goal were minimal footage for the
+reschedule feature alone, the services would keep taking `AppDbContext` and the
+solution would stay a single project with folders.
