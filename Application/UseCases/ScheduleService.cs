@@ -3,11 +3,8 @@ using TutoringScheduling.Application.Contracts;
 
 namespace TutoringScheduling.Application;
 
-/// <summary>
-/// Read side of the schedule: runs the conflict engine over stored bookings
-/// and shapes the results for the API.
-/// </summary>
-public sealed class ScheduleService
+/// <inheritdoc cref="IScheduleService"/>
+public sealed class ScheduleService : IScheduleService
 {
     private readonly IBookingStore _bookings;
     private readonly IRoomStore _rooms;

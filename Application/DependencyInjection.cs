@@ -7,9 +7,9 @@ public static class DependencyInjection
     /// <summary>Registers the use-case services. Persistence comes from Infrastructure.</summary>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<ScheduleService>();
-        services.AddScoped<TutorService>();
-        services.AddScoped<MoveLessonService>();
+        services.AddScoped<IScheduleService, ScheduleService>();
+        services.AddScoped<ITutorService, TutorService>();
+        services.AddScoped<IMoveLessonService, MoveLessonService>();
 
         return services;
     }

@@ -5,12 +5,11 @@ using TutoringScheduling.Domain;
 namespace TutoringScheduling.Application;
 
 /// <summary>
-/// Read side of tutor workload: counts a tutor's booked lessons for one day and
-/// flags anyone over the soft 6-lessons-a-day limit. Split from the schedule
-/// board because it is an independent view; the board still surfaces the same
-/// overload through the <c>TUTOR_DAILY_LIMIT</c> conflict.
+/// Read side of tutor workload. Split from the schedule board because it is an
+/// independent view; the board still surfaces the same overload through the
+/// <c>TUTOR_DAILY_LIMIT</c> conflict.
 /// </summary>
-public sealed class TutorService
+public sealed class TutorService : ITutorService
 {
     private readonly IBookingStore _bookings;
 
