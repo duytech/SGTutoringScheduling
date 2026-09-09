@@ -6,14 +6,14 @@ public static class TutorsEndpoint
 {
     public static IEndpointRouteBuilder MapTutorsEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        var tutors = endpoints.MapGroup("/api/tutors");
+        var tutorRoutes = endpoints.MapGroup("/api/tutors");
 
-        tutors.MapGet("/loads", async (
+        tutorRoutes.MapGet("/loads", async (
             DateOnly date,
-            TutorLoadService tutorLoads,
+            TutorService tutors,
             CancellationToken cancellationToken) =>
         {
-            var response = await tutorLoads.GetForDayAsync(date, cancellationToken);
+            var response = await tutors.GetLoadsForDayAsync(date, cancellationToken);
             return Results.Ok(response);
         });
 

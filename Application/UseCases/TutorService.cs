@@ -10,16 +10,16 @@ namespace TutoringScheduling.Application;
 /// board because it is an independent view; the board still surfaces the same
 /// overload through the <c>TUTOR_DAILY_LIMIT</c> conflict.
 /// </summary>
-public sealed class TutorLoadService
+public sealed class TutorService
 {
     private readonly IBookingStore _bookings;
 
-    public TutorLoadService(IBookingStore bookings)
+    public TutorService(IBookingStore bookings)
     {
         _bookings = bookings;
     }
 
-    public async Task<TutorLoadsResponse> GetForDayAsync(
+    public async Task<TutorLoadsResponse> GetLoadsForDayAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
     {

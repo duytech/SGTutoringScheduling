@@ -203,7 +203,7 @@ it:
 | Layer | Project | Depends on | Holds |
 | --- | --- | --- | --- |
 | Entities | `Domain` | — | `Booking`, `LessonEvent`, `Room`, `Tutor`, `CentreCalendar`, the status/limit rules |
-| Use cases | `Application` | Domain | `MoveLessonService`, `ScheduleService`, `TutorLoadService`, `ConflictDetector`, the DTO contracts, and the ports `IClock` plus `IBookingStore` / `IRoomStore` / `ILessonEventStore` / `IMoveRecorder` |
+| Use cases | `Application` | Domain | `MoveLessonService`, `ScheduleService`, `TutorService`, `ConflictDetector`, the DTO contracts, and the ports `IClock` plus `IBookingStore` / `IRoomStore` / `ILessonEventStore` / `IMoveRecorder` |
 | Frameworks | `Infrastructure` | Application | `AppDbContext`, migrations, the EF Core stores (`BookingStore`, `RoomStore`, `LessonEventStore`, `MoveRecorder`), `PinnedClock`, the CSV seeder |
 | Composition | `Api` | Application, Infrastructure | Minimal API endpoints, the static board, `Program.cs` |
 
@@ -219,7 +219,7 @@ intention-revealing methods that return materialised domain objects — no
 
 | Port | Methods | Consumers |
 | --- | --- | --- |
-| `IBookingStore` | `FindBookingAsync`, `GetBookingsForDayAsync`, `GetBookingsInRangeAsync` | `ScheduleService`, `TutorLoadService`, `MoveLessonService` |
+| `IBookingStore` | `FindBookingAsync`, `GetBookingsForDayAsync`, `GetBookingsInRangeAsync` | `ScheduleService`, `TutorService`, `MoveLessonService` |
 | `IRoomStore` | `RoomExistsAsync`, `GetRoomsAsync` | `ScheduleService`, `MoveLessonService` |
 | `ILessonEventStore` | `GetLessonEventsAsync`, `GetCutoffMovesTouchingDayAsync` | `ScheduleService` |
 | `IMoveRecorder` | `RecordMoveAsync` (persists the moved lesson + its event as one unit of work) | `MoveLessonService` |
