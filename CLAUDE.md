@@ -32,6 +32,9 @@ never the real system clock. State which date is used in the README.
 - No single-character names, loop indices included (`index`, `lesson`, `event`).
   In `frontend/` this is enforced by ESLint's `id-length` rule — run
   `npm run lint`.
+- In `frontend/`, a `return` that is not the first statement in its block needs
+  a blank line above it — enforced by
+  `@stylistic/padding-line-between-statements` (`npm run lint -- --fix`).
 
 ## Rules from the brief (see brief-notes.md for full context/contradictions)
 - 6 rooms, one lesson per room at a time, a tutor in one room at a time.

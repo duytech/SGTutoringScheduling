@@ -3,6 +3,7 @@ import { formatTime } from "../lib/format";
 
 export function Changes({ events, day }: { events: LessonEvent[]; day: string }) {
   if (!events || !events.length) return null;
+
   return (
     <div id="changes">
       <h2>Changes since 16:00 the day before — tell the tutors</h2>
@@ -13,6 +14,7 @@ export function Changes({ events, day }: { events: LessonEvent[]; day: string })
         if (event.fromDate === day && event.toDate === day) detail = `re-slotted ${from.trim()} → ${to.trim()}`;
         else if (event.toDate === day) detail = `moved here from ${from.trim()}`;
         else detail = `moved off this day to ${to.trim()}`;
+
         return (
           <div className="change" key={index}>
             <strong>{event.lessonId}</strong> {detail}

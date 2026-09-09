@@ -6,5 +6,6 @@ import { PINNED_TODAY } from "./schedule";
 export async function fetchTutorLoads(date: string): Promise<TutorLoadsResponse> {
   const response = await fetch(`/api/tutors/loads?date=${date || PINNED_TODAY}`);
   if (!response.ok) throw new Error(`tutor loads request failed: ${response.status}`);
+
   return (await response.json()) as TutorLoadsResponse;
 }

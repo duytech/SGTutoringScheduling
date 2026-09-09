@@ -27,6 +27,7 @@ export function App() {
       .catch(() => {
         if (!cancelled) setStatus("failed to load");
       });
+
     return () => {
       cancelled = true;
     };
