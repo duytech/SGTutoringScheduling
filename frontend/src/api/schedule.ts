@@ -7,5 +7,6 @@ export const PINNED_TODAY = "2026-03-06";
 export async function fetchSchedule(date: string): Promise<ScheduleDayResponse> {
   const response = await fetch(`/api/schedule?date=${date || PINNED_TODAY}`);
   if (!response.ok) throw new Error(`schedule request failed: ${response.status}`);
+
   return (await response.json()) as ScheduleDayResponse;
 }

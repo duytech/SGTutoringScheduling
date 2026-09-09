@@ -10,6 +10,7 @@ export function Banner({ conflicts }: { conflicts: Conflict[] }) {
       </div>
     );
   }
+
   return (
     <div id="banner">
       {conflicts.map((conflict, index) => (
