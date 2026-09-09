@@ -53,6 +53,13 @@ never the real system clock. State which date is used in the README.
 - Changes made after 16:00 the day before must be visible as changes, not
   silent overwrites of what a tutor was already told.
 
+## API design
+- One endpoint per responsibility. When a response starts carrying an unrelated
+  concern, split it into its own endpoint/resource instead of growing the
+  payload — e.g. per-tutor load is `GET /api/tutors/loads`, not a field on
+  `GET /api/schedule` (`DECISIONS.md` §9). This is the read-side of "one
+  endpoint per intent" below.
+
 ## Don't
 - Don't build a generic `PUT /lessons/{id}`. Use one endpoint per intent
   (create / move / cancel / mark-no-show / create-pair).
