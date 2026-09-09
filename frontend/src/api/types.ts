@@ -63,7 +63,11 @@ export interface ScheduleDayResponse {
   date: string;
   isMonday: boolean;
   rooms: RoomSchedule[];
-  tutorLoads: TutorLoad[];
   conflicts: Conflict[];
   changes: LessonEvent[];
+}
+
+export interface TutorLoadsResponse {
+  date: string;
+  tutorLoads: TutorLoad[];
 }
