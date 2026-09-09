@@ -20,9 +20,6 @@ using (var scope = app.Services.CreateScope())
     await DbSeeder.SeedAsync(db, AppContext.BaseDirectory);
 }
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
 app.MapConflictsEndpoint();
 app.MapScheduleEndpoint();
 app.MapTutorsEndpoint();

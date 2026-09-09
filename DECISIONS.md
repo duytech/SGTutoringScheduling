@@ -152,9 +152,13 @@ required to accept.
   surfaces the same overload through the `TUTOR_DAILY_LIMIT` conflict.
 - `GET /api/conflicts?from=&to=` — the engine over the whole week.
 
-The board (static and React) calls only `GET /api/schedule` and
+The board (the React app under `frontend/`) calls only `GET /api/schedule` and
 `GET /api/tutors/loads`. `move`, `history` and `conflicts` are API-only — no UI
 reaches them; the board stays a read-only proof of the move feature.
+
+An earlier throwaway static board (`Api/wwwroot/index.html`, one hand-written
+HTML file) was removed once the React app covered the same views. The `Api`
+project now serves JSON only.
 
 ## 10. One endpoint I rejected
 
@@ -218,7 +222,7 @@ It is split into four projects, each depending only on the ones inside it:
 | Entities | `Domain` | — | `Booking`, `LessonEvent`, `Room`, `Tutor`, `CentreCalendar`, the status/limit rules |
 | Use cases | `Application` | Domain | `MoveLessonService`, `ScheduleService`, `TutorService`, `ConflictDetector`, the DTO contracts, and the ports `IClock` plus `IBookingStore` / `IRoomStore` / `ILessonEventStore` / `IMoveRecorder` |
 | Frameworks | `Infrastructure` | Application | `AppDbContext`, migrations, the EF Core stores (`BookingStore`, `RoomStore`, `LessonEventStore`, `MoveRecorder`), `PinnedClock`, the CSV seeder |
-| Composition | `Api` | Application, Infrastructure | Minimal API endpoints, the static board, `Program.cs` |
+| Composition | `Api` | Application, Infrastructure | Minimal API endpoints (JSON only), `Program.cs` |
 
 `Tests/ArchitectureTests` makes the rule enforceable: it fails if `Application`
 ever references EF Core or ASP.NET.

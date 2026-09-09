@@ -1,8 +1,7 @@
 # Bright Path — React UI
 
-React 18 + TypeScript (Vite) port of the room board. Same interface and logic as
-the original static page at `backend/Api/wwwroot/index.html`, which is left in
-place.
+React 18 + TypeScript (Vite) room board: six rooms grouped by room, per-lesson
+conflict codes, post-cut-off changes, and the per-tutor load line.
 
 ## Run
 
@@ -34,14 +33,14 @@ explicit `date`, so this constant is always sent.
 npm run build
 ```
 
-Outputs a static bundle to `frontend/dist/` (not wired into the API — the original
-page still serves at `http://localhost:5243/`).
+Outputs a static bundle to `frontend/dist/` (not wired into the API — serve it
+with any static host).
 
 ## Structure
 
 - `src/api/` — DTO types (`types.ts`) and the read fetches (`schedule.ts`,
   `tutors.ts`)
-- `src/lib/format.ts` — `fmt()` time helper (`"HH:mm:ss"` -> `"HH:mm"`)
-- `src/components/` — one component per original render function: `App`, `Banner`,
+- `src/lib/format.ts` — `formatTime()` helper (`"HH:mm:ss"` -> `"HH:mm"`)
+- `src/components/` — one component per board section: `App`, `Banner`,
   `Changes`, `Loads`, `Rooms`, `Lesson`
-- `src/styles.css` — copied verbatim from the original page
+- `src/styles.css` — the board's styles
