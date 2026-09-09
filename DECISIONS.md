@@ -210,6 +210,11 @@ it:
 `Tests/ArchitectureTests` makes the rule enforceable: it fails if `Application`
 ever references EF Core or ASP.NET.
 
+The repo's `.editorconfig` also turns on one Roslynator formatting analyzer,
+`RCS0008` (blank line between a closing brace and the next statement), as an
+`error` — the backend counterpart of the frontend's blank-line-before-`return`
+lint rule.
+
 ### The persistence ports
 
 The use-case services previously took `AppDbContext` directly. They now depend

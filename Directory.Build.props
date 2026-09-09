@@ -7,4 +7,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!--
+    Formatting analyzers. Every RCS0* rule is off by default; .editorconfig turns
+    on only RCS0008 (blank line between a closing brace and the next statement),
+    the backend counterpart of the frontend's blank-line-before-return lint rule.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Roslynator.Formatting.Analyzers" Version="5.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
