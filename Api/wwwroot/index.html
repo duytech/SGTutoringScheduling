@@ -138,15 +138,18 @@
 
     async function load(date) {
       status.textContent = "loading…";
-      const url = `/api/schedule?date=${date || PINNED_TODAY}`;
-      const res = await fetch(url);
-      if (!res.ok) { status.textContent = "failed to load"; return; }
-      const data = await res.json();
+      const day = date || PINNED_TODAY;
+      const [scheduleRes, loadsRes] = await Promise.all([
+        fetch(`/api/schedule?date=${day}`),
+        fetch(`/api/tutors/loads?date=${day}`),
+      ]);
+      if (!scheduleRes.ok) { status.textContent = "failed to load"; return; }
+      const data = await scheduleRes.json();
       dateInput.value = data.date;
       status.textContent = data.isMonday ? "centre closed (Monday)" : "";
       renderBanner(data.conflicts);
       renderChanges(data.changes, data.date);
-      renderLoads(data.tutorLoads);
+      renderLoads(loadsRes.ok ? (await loadsRes.json()).tutorLoads : []);
       renderRooms(data.rooms);
     }
 
