@@ -1,0 +1,8 @@
+root = true
+
+# Roslynator formatting analyzers ship disabled. Enable only RCS0008 — a blank
+# line is required between a closing brace and the statement that follows it.
+# This is the backend counterpart of the frontend ESLint rule
+# @stylistic/padding-line-between-statements (blank line before return).
+[*.cs]
+dotnet_diagnostic.RCS0008.severity = error
