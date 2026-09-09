@@ -24,7 +24,7 @@ right one feature and defending the choice.
 4. "READ FIRST" note about a custom typeface / no copy-paste: read the PDF
    pages visually, don't trust copy-pasted text from it.
 
-## Real conflicts found in seed-data/lessons_export.csv (35 rows)
+## Real conflicts found in backend/seed-data/lessons_export.csv (35 rows)
 - **True physical double-booking**: tutor T1 booked in room R1 (L033) and
   room R2 (L034) at the same time (2026-03-10, 09:00). Matches the owner's
   "student booked into two places, nobody knew" story — impossible, must be

@@ -2,8 +2,9 @@
 
 ## What this is
 Internal scheduling tool for a tutoring centre (Da Nang). Full brief and
-grading rubric: see `brief-notes.md`. Seed data: `seed-data/lessons_export.csv`
-(35 rows, week of 2026-03-03 to 2026-03-10) and `seed-data/tutors.csv`.
+grading rubric: see `brief-notes.md`. Seed data:
+`backend/seed-data/lessons_export.csv` (35 rows, week of 2026-03-03 to
+2026-03-10) and `backend/seed-data/tutors.csv`.
 
 Time-boxed to ~2.5 hours. Build exactly one feature, fully correct, over
 several partial ones.
@@ -12,12 +13,13 @@ several partial ones.
 Any stack I'm fastest in — see `brief-notes.md` for the candidate's default
 (ASP.NET Minimal API + EF Core + SQLite) unless told otherwise in chat.
 
-The code is a four-project Clean Architecture solution
+The .NET solution lives under `backend/` (`frontend/` and the docs stay at the
+repo root). It is a four-project Clean Architecture solution
 (`Api → Infrastructure → Application → Domain`; dependencies point inward only).
 The use-case services reach persistence through the per-aggregate ports in
 `Application/Abstractions` (`IBookingStore`, `IRoomStore`, `ILessonEventStore`,
 `IMoveRecorder`), implemented in `Infrastructure` — they never see a `DbContext`.
-Run with `dotnet run --project Api`; `dotnet ef` uses
+From `backend/`: run with `dotnet run --project Api`; `dotnet ef` uses
 `--project Infrastructure --startup-project Api`. Layer map and rationale:
 `DECISIONS.md` §15.
 
@@ -69,5 +71,5 @@ never the real system clock. State which date is used in the README.
 ## Deliverables expected
 - `DECISIONS.md` at repo root (four sections: questions for the owner,
   feature chosen + why, data model/API for it, reflection).
-- Working code, seeded from `seed-data/`, with run commands in README.
+- Working code, seeded from `backend/seed-data/`, with run commands in README.
 - Atomic commits, one change each, not squashed.
