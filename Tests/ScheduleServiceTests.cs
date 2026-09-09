@@ -6,7 +6,7 @@ namespace TutoringScheduling.Tests;
 
 public class ScheduleServiceTests : SqlServerFixture
 {
-    private ScheduleService Service => NewScheduleService();
+    private IScheduleService Service => NewScheduleService();
 
     [Fact]
     public async Task GetDayAsync_ReturnsEveryRoom_EvenWhenEmpty()

@@ -10,7 +10,7 @@ namespace TutoringScheduling.Tests;
 /// </summary>
 public class ArchitectureTests
 {
-    private static readonly Assembly Application = typeof(ScheduleService).Assembly;
+    private static readonly Assembly Application = typeof(IScheduleService).Assembly;
     private static readonly Assembly Domain = typeof(Booking).Assembly;
 
     [Fact]

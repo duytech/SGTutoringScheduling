@@ -9,7 +9,7 @@ namespace TutoringScheduling.Tests;
 public class MoveLessonServiceTests : SqlServerFixture
 {
     // Friday 2026-03-06, 09:00 centre time.
-    private MoveLessonService ServiceAt(string now = "2026-03-06T09:00:00") =>
+    private IMoveLessonService ServiceAt(string now = "2026-03-06T09:00:00") =>
         NewMover(new FixedClock(now));
 
     private static MoveLessonRequest To(string date, string start, string? room = null, string? reason = null) =>

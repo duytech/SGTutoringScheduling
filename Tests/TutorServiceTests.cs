@@ -6,7 +6,7 @@ namespace TutoringScheduling.Tests;
 
 public class TutorServiceTests : SqlServerFixture
 {
-    private TutorService Service => NewTutorService();
+    private ITutorService Service => NewTutorService();
 
     [Fact]
     public async Task GetLoadsForDayAsync_WithNoBookings_ReturnsEmptyLoadsForThatDate()
