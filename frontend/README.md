@@ -1,13 +1,15 @@
 # Bright Path — React UI
 
 React 18 + TypeScript (Vite) port of the room board. Same interface and logic as
-the original static page at `Api/wwwroot/index.html`, which is left in place.
+the original static page at `backend/Api/wwwroot/index.html`, which is left in
+place.
 
 ## Run
 
 Two shells:
 
 ```bash
+cd backend
 dotnet run --project Api
 ```
 
@@ -23,7 +25,7 @@ API at `http://localhost:5243` (see `vite.config.ts`), so no CORS config is need
 ## Pinned "today"
 
 The board defaults to **2026-03-06** (`PINNED_TODAY` in `src/api/schedule.ts`),
-matching `Schedule:Now` in `Api/appsettings.json`. `GET /api/schedule` requires an
+matching `Schedule:Now` in `backend/Api/appsettings.json`. `GET /api/schedule` requires an
 explicit `date`, so this constant is always sent.
 
 ## Build

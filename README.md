@@ -13,16 +13,20 @@ Clean Architecture solution (see [Layout](#layout)).
 
 ## Run it
 
+The .NET side lives under `backend/` (solution, projects, `seed-data/`); run the
+commands below from there.
+
 Prerequisite: a local SQL Server instance reachable at `localhost` with Windows
-authentication (the connection string lives in `Api/appsettings.json` under
-`ConnectionStrings:Default`).
+authentication (the connection string lives in `backend/Api/appsettings.json`
+under `ConnectionStrings:Default`).
 
 ```bash
+cd backend
 dotnet run --project Api
 ```
 
 On start the app applies migrations, creates the `TutoringScheduling` database,
-and seeds it from the CSV export under `seed-data/` (34 lessons, week of
+and seeds it from the CSV export under `backend/seed-data/` (34 lessons, week of
 2026-03-03 … 03-10), loaded verbatim including the historical conflicts. It also
 writes a `Created` event per lesson and reconstructs `L032`'s "moved from Sunday"
 history, which the export itself lost. Drop the `TutoringScheduling` database to
@@ -42,9 +46,11 @@ npm run dev
 ```
 
 and open http://localhost:5173 (Vite proxies `/api` to the API). The original
-static board at `wwwroot/index.html` is unchanged. See `frontend/README.md`.
+static board at `backend/Api/wwwroot/index.html` is unchanged. See
+`frontend/README.md`.
 
 ```bash
+cd backend
 dotnet test
 ```
 
@@ -59,8 +65,9 @@ The brief pins the clock to a value inside the seeded week, never the real
 system clock. It is **2026-03-06 09:00 (+07:00)**, set by `Schedule:Now` in
 `appsettings.json`, and drives the "after 16:00 the day before" cut-off in
 `MoveLessonService`. The read endpoints take an explicit `date`; the board's
-default day is a client-side constant (`PINNED_TODAY` in `wwwroot/index.html`,
-and `frontend/src/api/schedule.ts` for the React UI), set to the same date.
+default day is a client-side constant (`PINNED_TODAY` in
+`backend/Api/wwwroot/index.html`, and `frontend/src/api/schedule.ts` for the
+React UI), set to the same date.
 
 ## The feature — reschedule a lesson
 
@@ -91,8 +98,8 @@ The lesson's current state plus its event log, oldest first.
 
 ## Supporting read views
 
-The board — static (`Api/wwwroot/index.html`) and React — fetches exactly two
-endpoints:
+The board — static (`backend/Api/wwwroot/index.html`) and React — fetches
+exactly two endpoints:
 
 | Endpoint | Purpose |
 | --- | --- |
@@ -136,27 +143,31 @@ two warnings (tutor `T1` over limit on 2026-03-06, Monday lesson `L032`).
 
 ## Layout
 
-Four projects, dependencies pointing inward only
+The .NET solution sits under `backend/`; `frontend/` and the docs stay at the
+repo root. Four projects, dependencies pointing inward only
 (`Api → Infrastructure → Application → Domain`):
 
 ```
-Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
-Application/     use cases + API contracts. References Domain only.
-                 UseCases/    MoveLessonService, ScheduleService, TutorService
-                              (each behind an I…Service interface; DI maps it)
-                 Abstractions/ IClock + the persistence ports
-                              (IBookingStore, IRoomStore, ILessonEventStore, IMoveRecorder)
-                 Contracts/   request/response DTOs
-                 ConflictDetector (pure), LessonMapper
-Infrastructure/  EF Core implementation of the ports. References Application.
-                 Persistence/ AppDbContext, migrations, the EF Core stores, CSV seeder
-                 Time/        PinnedClock
-Api/             composition root: Minimal API endpoints, static board, startup.
-                 Endpoints/   one file per route
-                 wwwroot/     the static board
-frontend/        React 18 + TS (Vite) port of the board; dev-proxies /api
-Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
-                 ArchitectureTests enforces the dependency rule
+backend/
+  TutoringScheduling.slnx, Directory.Build.props
+  seed-data/       lessons_export.csv, tutors.csv
+  Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
+  Application/     use cases + API contracts. References Domain only.
+                   UseCases/    MoveLessonService, ScheduleService, TutorService
+                                (each behind an I…Service interface; DI maps it)
+                   Abstractions/ IClock + the persistence ports
+                                (IBookingStore, IRoomStore, ILessonEventStore, IMoveRecorder)
+                   Contracts/   request/response DTOs
+                   ConflictDetector (pure), LessonMapper
+  Infrastructure/  EF Core implementation of the ports. References Application.
+                   Persistence/ AppDbContext, migrations, the EF Core stores, CSV seeder
+                   Time/        PinnedClock
+  Api/             composition root: Minimal API endpoints, static board, startup.
+                   Endpoints/   one file per route
+                   wwwroot/     the static board
+  Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
+                   ArchitectureTests enforces the dependency rule
+frontend/          React 18 + TS (Vite) port of the board; dev-proxies /api
 ```
 
 The use-case layer never sees a `DbContext` — it goes through the persistence
@@ -164,7 +175,7 @@ ports (`IBookingStore`, `IRoomStore`, `ILessonEventStore`, `IMoveRecorder`),
 defined in `Application` and implemented in `Infrastructure`. `AddApplication()`
 and `AddInfrastructure(config)` wire each layer up in `Api/Program.cs`.
 
-EF Core migrations (startup project is `Api`):
+EF Core migrations (from `backend/`, startup project is `Api`):
 
 ```bash
 dotnet ef migrations add <Name> --project Infrastructure --startup-project Api
