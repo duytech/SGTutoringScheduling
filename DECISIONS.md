@@ -152,6 +152,10 @@ required to accept.
   surfaces the same overload through the `TUTOR_DAILY_LIMIT` conflict.
 - `GET /api/conflicts?from=&to=` — the engine over the whole week.
 
+The board (static and React) calls only `GET /api/schedule` and
+`GET /api/tutors/loads`. `move`, `history` and `conflicts` are API-only — no UI
+reaches them; the board stays a read-only proof of the move feature.
+
 ## 10. One endpoint I rejected
 
 `PUT /lessons/{id}`. The brief calls it out, and it would make a move, a
