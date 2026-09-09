@@ -144,8 +144,12 @@ required to accept.
 - `POST /api/lessons/{id}/move` — the intent. One endpoint, one action; no
   generic `PUT /lessons/{id}`.
 - `GET /api/lessons/{id}/history` — the audit trail.
-- `GET /api/schedule?date=` — the board's data (rooms, conflicts, tutor load,
-  post-cut-off changes).
+- `GET /api/schedule?date=` — the board's data (rooms, conflicts, post-cut-off
+  changes) in one call.
+- `GET /api/tutors/loads?date=` — per-tutor lesson count for the day plus the
+  over-the-6-limit flag. Its own view under the `tutors` resource, not folded
+  into the schedule payload: it answers a different question and the board still
+  surfaces the same overload through the `TUTOR_DAILY_LIMIT` conflict.
 - `GET /api/conflicts?from=&to=` — the engine over the whole week.
 
 ## 10. One endpoint I rejected
@@ -199,7 +203,7 @@ it:
 | Layer | Project | Depends on | Holds |
 | --- | --- | --- | --- |
 | Entities | `Domain` | — | `Booking`, `LessonEvent`, `Room`, `Tutor`, `CentreCalendar`, the status/limit rules |
-| Use cases | `Application` | Domain | `MoveLessonService`, `ScheduleService`, `ConflictDetector`, the DTO contracts, and the ports `IClock` plus `IBookingStore` / `IRoomStore` / `ILessonEventStore` / `IMoveRecorder` |
+| Use cases | `Application` | Domain | `MoveLessonService`, `ScheduleService`, `TutorLoadService`, `ConflictDetector`, the DTO contracts, and the ports `IClock` plus `IBookingStore` / `IRoomStore` / `ILessonEventStore` / `IMoveRecorder` |
 | Frameworks | `Infrastructure` | Application | `AppDbContext`, migrations, the EF Core stores (`BookingStore`, `RoomStore`, `LessonEventStore`, `MoveRecorder`), `PinnedClock`, the CSV seeder |
 | Composition | `Api` | Application, Infrastructure | Minimal API endpoints, the static board, `Program.cs` |
 
@@ -215,7 +219,7 @@ intention-revealing methods that return materialised domain objects — no
 
 | Port | Methods | Consumers |
 | --- | --- | --- |
-| `IBookingStore` | `FindBookingAsync`, `GetBookingsForDayAsync`, `GetBookingsInRangeAsync` | `ScheduleService`, `MoveLessonService` |
+| `IBookingStore` | `FindBookingAsync`, `GetBookingsForDayAsync`, `GetBookingsInRangeAsync` | `ScheduleService`, `TutorLoadService`, `MoveLessonService` |
 | `IRoomStore` | `RoomExistsAsync`, `GetRoomsAsync` | `ScheduleService`, `MoveLessonService` |
 | `ILessonEventStore` | `GetLessonEventsAsync`, `GetCutoffMovesTouchingDayAsync` | `ScheduleService` |
 | `IMoveRecorder` | `RecordMoveAsync` (persists the moved lesson + its event as one unit of work) | `MoveLessonService` |
