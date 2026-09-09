@@ -91,6 +91,17 @@ The lesson's current state plus its event log, oldest first.
 
 ## Supporting read views
 
+The board — static (`Api/wwwroot/index.html`) and React — fetches exactly two
+endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/schedule?date=` | One day's board: rooms, per-lesson conflict codes, `movedAfterCutoff`, post-cut-off changes |
+| `GET /api/tutors/loads?date=` | Per-tutor lesson count for the day and the over-the-6-limit flag |
+
+`date` is **required** on both (`400` without it). `GET /api/conflicts` below is
+API-only — nothing in the UI calls it.
+
 ### `GET /api/schedule?date=YYYY-MM-DD`
 
 One day, grouped by room (all six, empty ones included). Each lesson carries
