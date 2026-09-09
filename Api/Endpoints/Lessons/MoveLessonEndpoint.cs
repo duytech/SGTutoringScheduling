@@ -10,7 +10,7 @@ public static class MoveLessonEndpoint
         endpoints.MapPost("/api/lessons/{id}/move", async (
             string id,
             MoveLessonRequest request,
-            MoveLessonService service,
+            IMoveLessonService service,
             CancellationToken cancellationToken) =>
         {
             var result = await service.MoveAsync(id, request, cancellationToken);

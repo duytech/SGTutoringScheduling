@@ -9,7 +9,7 @@ public static class ConflictsEndpoint
         endpoints.MapGet("/api/conflicts", async (
             DateOnly? from,
             DateOnly? to,
-            ScheduleService schedule,
+            IScheduleService schedule,
             CancellationToken cancellationToken) =>
         {
             var response = await schedule.GetConflictsAsync(from, to, cancellationToken);

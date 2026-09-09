@@ -10,7 +10,7 @@ public static class TutorsEndpoint
 
         tutorRoutes.MapGet("/loads", async (
             DateOnly date,
-            TutorService tutors,
+            ITutorService tutors,
             CancellationToken cancellationToken) =>
         {
             var response = await tutors.GetLoadsForDayAsync(date, cancellationToken);

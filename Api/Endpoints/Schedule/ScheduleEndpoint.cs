@@ -8,7 +8,7 @@ public static class ScheduleEndpoint
     {
         endpoints.MapGet("/api/schedule", async (
             DateOnly date,
-            ScheduleService schedule,
+            IScheduleService schedule,
             CancellationToken cancellationToken) =>
         {
             var response = await schedule.GetDayAsync(date, cancellationToken);
