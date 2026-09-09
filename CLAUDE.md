@@ -26,11 +26,12 @@ Use 2026-03-06 (or another date inside 2026-03-03..2026-03-10) as "today" —
 never the real system clock. State which date is used in the README.
 
 ## Naming
-- No single-character variable names, loop indices included — use `index`,
-  `lesson`, `event`, and so on.
 - Spell names out in full, no abbreviations: `formatTime` not `fmt`, `response`
-  not `res`, `rowClassName` not `cls`. Established domain acronyms (`Api`, `Id`,
-  `csv`) are fine.
+  not `res`, `rowClassName` not `cls`, `cancellationToken` not `ct`. Established
+  domain acronyms (`Api`, `Id`, `csv`) are fine.
+- No single-character names, loop indices included (`index`, `lesson`, `event`).
+  In `frontend/` this is enforced by ESLint's `id-length` rule — run
+  `npm run lint`.
 
 ## Rules from the brief (see brief-notes.md for full context/contradictions)
 - 6 rooms, one lesson per room at a time, a tutor in one room at a time.
