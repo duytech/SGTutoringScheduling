@@ -5,8 +5,8 @@ Internal scheduling tool for **Bright Path Learning Centre** (Da Nang).
 The one feature built here is **rescheduling a lesson**: a single intent
 endpoint that checks the target slot against the conflict engine, records the
 change in an append-only log, and makes a change past the daily cut-off
-**visible as a change** rather than a silent overwrite. A read-only room board
-shows the result.
+**visible as a change** rather than a silent overwrite. A read-only React room
+board (`frontend/`) shows the result.
 
 Stack: ASP.NET Core Minimal API, EF Core, SQL Server — laid out as a four-project
 Clean Architecture solution (see [Layout](#layout)).
@@ -32,12 +32,13 @@ writes a `Created` event per lesson and reconstructs `L032`'s "moved from Sunday
 history, which the export itself lost. Drop the `TutoringScheduling` database to
 re-seed.
 
-Open the printed URL for the board, or call the API directly.
+This is a JSON API — no page at `/`. Call the endpoints directly, or run the
+board (below).
 
-### React UI (`frontend/`)
+### The board (`frontend/`)
 
-The board also has a React 18 + TypeScript (Vite) port under `frontend/` — same
-interface and logic as the static page. Run the API as above, then:
+The room board is a React 18 + TypeScript (Vite) app under `frontend/`. Run the
+API as above, then:
 
 ```bash
 cd frontend
@@ -45,8 +46,7 @@ npm install
 npm run dev
 ```
 
-and open http://localhost:5173 (Vite proxies `/api` to the API). The original
-static board at `backend/Api/wwwroot/index.html` is unchanged. See
+and open http://localhost:5173 (Vite proxies `/api` to the API). See
 `frontend/README.md`.
 
 ```bash
@@ -66,8 +66,7 @@ system clock. It is **2026-03-06 09:00 (+07:00)**, set by `Schedule:Now` in
 `appsettings.json`, and drives the "after 16:00 the day before" cut-off in
 `MoveLessonService`. The read endpoints take an explicit `date`; the board's
 default day is a client-side constant (`PINNED_TODAY` in
-`backend/Api/wwwroot/index.html`, and `frontend/src/api/schedule.ts` for the
-React UI), set to the same date.
+`frontend/src/api/schedule.ts`), set to the same date.
 
 ## The feature — reschedule a lesson
 
@@ -98,8 +97,7 @@ The lesson's current state plus its event log, oldest first.
 
 ## Supporting read views
 
-The board — static (`backend/Api/wwwroot/index.html`) and React — fetches
-exactly two endpoints:
+The board (`frontend/`) fetches exactly two endpoints:
 
 | Endpoint | Purpose |
 | --- | --- |
@@ -162,12 +160,11 @@ backend/
   Infrastructure/  EF Core implementation of the ports. References Application.
                    Persistence/ AppDbContext, migrations, the EF Core stores, CSV seeder
                    Time/        PinnedClock
-  Api/             composition root: Minimal API endpoints, static board, startup.
+  Api/             composition root: Minimal API endpoints, startup. JSON only.
                    Endpoints/   one file per route
-                   wwwroot/     the static board
   Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
                    ArchitectureTests enforces the dependency rule
-frontend/          React 18 + TS (Vite) port of the board; dev-proxies /api
+frontend/          React 18 + TS (Vite) room board; dev-proxies /api
 ```
 
 The use-case layer never sees a `DbContext` — it goes through the persistence
