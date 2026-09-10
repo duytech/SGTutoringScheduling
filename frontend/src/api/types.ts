@@ -45,6 +45,18 @@ export interface Conflict {
   studentName: string | null;
 }
 
+export interface ConflictSummary {
+  errors: number;
+  warnings: number;
+}
+
+export interface ConflictsResponse {
+  from: string | null;
+  to: string | null;
+  summary: ConflictSummary;
+  conflicts: Conflict[];
+}
+
 export interface LessonEvent {
   lessonId: string;
   type: string;
@@ -63,7 +75,6 @@ export interface ScheduleDayResponse {
   date: string;
   isMonday: boolean;
   rooms: RoomSchedule[];
-  conflicts: Conflict[];
   changes: LessonEvent[];
 }
 

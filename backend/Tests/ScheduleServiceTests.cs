@@ -32,7 +32,6 @@ public class ScheduleServiceTests : SqlServerFixture
         Assert.Equal(2, lessons.Count);
         Assert.All(lessons, lesson =>
             Assert.Contains(ConflictCodes.TutorDoubleBooked, lesson.ConflictCodes));
-        Assert.Single(day.Conflicts, c => c.Code == ConflictCodes.TutorDoubleBooked);
     }
 
     [Fact]

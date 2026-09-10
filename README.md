@@ -97,22 +97,23 @@ The lesson's current state plus its event log, oldest first.
 
 ## Supporting read views
 
-The board (`frontend/`) fetches exactly two endpoints:
+The board (`frontend/`) fetches three endpoints:
 
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /api/schedule?date=` | One day's board: rooms, per-lesson conflict codes, `movedAfterCutoff`, post-cut-off changes |
 | `GET /api/tutors/loads?date=` | Per-tutor lesson count for the day and the over-the-6-limit flag |
+| `GET /api/conflicts?from=&to=` | The day's conflict list for the banner (`from` = `to` = the board date) |
 
-`date` is **required** on both (`400` without it). `GET /api/conflicts` below is
-API-only — nothing in the UI calls it.
+`date` is **required** on the first two (`400` without it).
 
 ### `GET /api/schedule?date=YYYY-MM-DD`
 
 One day, grouped by room (all six, empty ones included). Each lesson carries
-its conflict codes and a `movedAfterCutoff` flag; the response also has the
-day's conflicts and a `changes` list of post-cut-off moves touching that day.
-`date` is **required** — a request without it returns `400`.
+its conflict codes and a `movedAfterCutoff` flag; the response also has a
+`changes` list of post-cut-off moves touching that day. The day's conflict
+list is served separately by `GET /api/conflicts` (below). `date` is
+**required** — a request without it returns `400`.
 
 ### `GET /api/tutors/loads?date=YYYY-MM-DD`
 
@@ -122,7 +123,8 @@ soft 6-lessons-a-day limit. `date` is **required** (`400` without it).
 ### `GET /api/conflicts?from=&to=`
 
 Runs the conflict engine over stored bookings (optionally within a range) and
-returns every clash plus an error/warning count.
+returns every clash plus an error/warning count. The board calls this with
+`from` = `to` = the current day to fill its banner.
 
 ## Conflict codes
 

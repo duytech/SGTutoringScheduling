@@ -144,17 +144,21 @@ required to accept.
 - `POST /api/lessons/{id}/move` — the intent. One endpoint, one action; no
   generic `PUT /lessons/{id}`.
 - `GET /api/lessons/{id}/history` — the audit trail.
-- `GET /api/schedule?date=` — the board's data (rooms, conflicts, post-cut-off
-  changes) in one call.
+- `GET /api/schedule?date=` — the board's data (rooms with per-lesson conflict
+  codes, post-cut-off changes) in one call. The day's conflict list is not
+  folded in: it is its own read view under `conflicts`, same reasoning as the
+  tutor-loads split below.
 - `GET /api/tutors/loads?date=` — per-tutor lesson count for the day plus the
   over-the-6-limit flag. Its own view under the `tutors` resource, not folded
   into the schedule payload: it answers a different question and the board still
   surfaces the same overload through the `TUTOR_DAILY_LIMIT` conflict.
-- `GET /api/conflicts?from=&to=` — the engine over the whole week.
+- `GET /api/conflicts?from=&to=` — the engine over a range (the whole week, or
+  `from` = `to` for one day, which is how the board fills its banner).
 
-The board (the React app under `frontend/`) calls only `GET /api/schedule` and
-`GET /api/tutors/loads`. `move`, `history` and `conflicts` are API-only — no UI
-reaches them; the board stays a read-only proof of the move feature.
+The board (the React app under `frontend/`) calls `GET /api/schedule`,
+`GET /api/tutors/loads` and `GET /api/conflicts` (single day). `move` and
+`history` are API-only — no UI reaches them; the board stays a read-only proof
+of the move feature.
 
 An earlier throwaway static board (`Api/wwwroot/index.html`, one hand-written
 HTML file) was removed once the React app covered the same views. The `Api`

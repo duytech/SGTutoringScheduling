@@ -8,8 +8,6 @@ public sealed class ScheduleDayResponse
 
     public List<RoomScheduleDto> Rooms { get; set; } = [];
 
-    public List<ConflictDto> Conflicts { get; set; } = [];
-
     /// <summary>
     /// Moves touching this day that were made after 16:00 the day before — the
     /// changes a tutor needs to be told about rather than discover.
