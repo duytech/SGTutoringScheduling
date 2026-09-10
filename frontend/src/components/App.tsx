@@ -29,7 +29,6 @@ export function App() {
         setTutorLoads(loads.tutorLoads);
         setConflicts(dayConflicts.conflicts);
         setStatus(day.isMonday ? "centre closed (Monday)" : "");
-        if (day.date !== date) setDate(day.date);
       })
       .catch((reason) => {
         if (cancelled) return;
@@ -66,7 +65,7 @@ export function App() {
         {data && (
           <>
             <Banner conflicts={conflicts} />
-            <Changes events={data.changes} day={data.date} />
+            <Changes events={data.changes} day={date} />
             <Loads tutorLoads={tutorLoads} />
             <Rooms rooms={data.rooms} />
           </>
