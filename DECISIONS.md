@@ -156,11 +156,13 @@ required to accept.
   `from` = `to` for one day, which is how the board fills its banner).
 
 The board (the React app under `frontend/`) calls `GET /api/schedule`,
-`GET /api/tutors/loads` and `GET /api/conflicts` (single day). Each call lives in
-the component that consumes it — `Banner` fetches conflicts, `Loads` fetches
-tutor loads, `App` only the schedule — so one endpoint failing degrades just that
-view instead of blanking the board. `move` and `history` are API-only — no UI
-reaches them; the board stays a read-only proof of the move feature.
+`GET /api/tutors/loads` and `GET /api/conflicts` (single day). `App` issues all
+three together in one `Promise.all` behind a single loading flag: the date picker
+is disabled and the board dimmed behind a spinner until the whole day is ready.
+The trade-off is all-or-nothing — any one of the three failing shows "failed to
+load" for the board, rather than each view degrading on its own. `move` and
+`history` are API-only — no UI reaches them; the board stays a read-only proof of
+the move feature.
 
 An earlier throwaway static board (`Api/wwwroot/index.html`, one hand-written
 HTML file) was removed once the React app covered the same views. The `Api`

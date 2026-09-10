@@ -42,7 +42,8 @@ with any static host).
   `tutors.ts`, `conflicts.ts`)
 - `src/lib/format.ts` — `formatTime()` helper (`"HH:mm:ss"` -> `"HH:mm"`)
 - `src/components/` — one component per board section: `App`, `Banner`,
-  `Changes`, `Loads`, `Rooms`, `Lesson`. Each view fetches its own resource in a
-  `useEffect` keyed by `date` (`Banner` → conflicts, `Loads` → tutor loads);
-  `App` only fetches the schedule. One endpoint failing blanks just its view.
+  `Changes`, `Loads`, `Rooms`, `Lesson`. `App` fetches the three board endpoints
+  together in one `Promise.all` and holds a single loading flag (it dims the
+  board and disables the date picker until the whole day is ready); `Banner` /
+  `Loads` are presentational.
 - `src/styles.css` — the board's styles
