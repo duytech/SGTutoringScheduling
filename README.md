@@ -6,7 +6,7 @@ The one feature built here is **rescheduling a lesson**: a single intent
 endpoint that checks the target slot against the conflict engine, records the
 change in an append-only log, and makes a change past the daily cut-off
 **visible as a change** rather than a silent overwrite. A read-only React room
-board (`frontend/`) shows the result.
+board (`frontend/`) — the [today view](#the-today-view) — shows the result.
 
 Stack: ASP.NET Core Minimal API, EF Core, SQL Server — laid out as a four-project
 Clean Architecture solution (see [Layout](#layout)).
@@ -94,6 +94,28 @@ lesson.
 ### `GET /api/lessons/{id}/history`
 
 The lesson's current state plus its event log, oldest first.
+
+## The today view
+
+The board is a read-only view of **one day**, all six rooms side by side (empty
+ones included). The date picker defaults to the pinned **2026-03-06**
+(`PINNED_TODAY`); while a day loads, the board dims behind a spinner and the
+picker is disabled until every part is ready.
+
+Above the rooms it shows:
+
+- the **conflict banner** — every clash the engine finds for the day, errors and
+  warnings (see [Conflict codes](#conflict-codes));
+- the **tutor load line** — each tutor's lesson count for the day, anyone over
+  the soft 6-a-day limit in red;
+- **"Changes since 16:00 the day before"** — moves made past the cut-off,
+  surfaced as changes to tell the tutors about rather than silent edits (this is
+  the point of the feature); hidden when there are none.
+
+Each lesson row carries its badges: conflict codes, `exam pair`, `moved late`,
+and `Cancelled` / `NoShow`. Rows in a clash are tinted.
+
+![Bright Path room board — 2026-03-06](docs/today-view.png)
 
 ## Supporting read views
 
