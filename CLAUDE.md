@@ -27,18 +27,9 @@ From `backend/`: run with `dotnet run --project Api`; `dotnet ef` uses
 Use 2026-03-06 (or another date inside 2026-03-03..2026-03-10) as "today" —
 never the real system clock. State which date is used in the README.
 
-## Naming
-- Spell names out in full, no abbreviations: `formatTime` not `fmt`, `response`
-  not `res`, `rowClassName` not `cls`, `cancellationToken` not `ct`. Established
-  domain acronyms (`Api`, `Id`, `csv`) are fine.
-- No single-character names, loop indices included (`index`, `lesson`, `event`).
-  In `frontend/` this is enforced by ESLint's `id-length` rule — run
-  `npm run lint`.
-- Keep a blank line between a closing brace and the statement that follows it
-  (so an early `return` after a guard block stands apart). In `frontend/` this
-  is ESLint's `@stylistic/padding-line-between-statements` (`npm run lint --
-  --fix`); in the backend it is Roslynator `RCS0008`, set to `error` in
-  `.editorconfig`, so `dotnet build` fails on it — `dotnet format` fixes it.
+## Code standards
+Naming and API-design conventions live in `context/code-standards.md` — follow
+them for all code in this repo.
 
 ## Rules from the brief (see brief-notes.md for full context/contradictions)
 - 6 rooms, one lesson per room at a time, a tutor in one room at a time.
@@ -52,13 +43,6 @@ never the real system clock. State which date is used in the README.
   "pairing" action, never inferred from a coincidental duplicate.
 - Changes made after 16:00 the day before must be visible as changes, not
   silent overwrites of what a tutor was already told.
-
-## API design
-- One endpoint per responsibility. When a response starts carrying an unrelated
-  concern, split it into its own endpoint/resource instead of growing the
-  payload — e.g. per-tutor load is `GET /api/tutors/loads`, not a field on
-  `GET /api/schedule` (`DECISIONS.md` §9). This is the read-side of "one
-  endpoint per intent" below.
 
 ## Don't
 - Don't build a generic `PUT /lessons/{id}`. Use one endpoint per intent
