@@ -55,7 +55,6 @@ public sealed class ScheduleService : IScheduleService
 
         return new ScheduleDayResponse
         {
-            Date = date,
             IsMonday = date.DayOfWeek == DayOfWeek.Monday,
             Rooms = roomSchedules,
             Changes = cutoffMoves

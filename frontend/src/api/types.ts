@@ -72,7 +72,6 @@ export interface LessonEvent {
 }
 
 export interface ScheduleDayResponse {
-  date: string;
   isMonday: boolean;
   rooms: RoomSchedule[];
   changes: LessonEvent[];
