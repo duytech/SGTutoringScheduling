@@ -2,8 +2,6 @@ namespace TutoringScheduling.Application.Contracts;
 
 public sealed class ScheduleDayResponse
 {
-    public required DateOnly Date { get; set; }
-
     public bool IsMonday { get; set; }
 
     public List<RoomScheduleDto> Rooms { get; set; } = [];
