@@ -24,6 +24,8 @@ public sealed class ScheduleService : IScheduleService
         var rooms = await _rooms.GetRoomsAsync(cancellationToken);
         var bookings = await _bookings.GetBookingsForDayAsync(date, cancellationToken);
 
+        // The detector still runs, but only to tag each lesson with its conflict
+        // codes. The day's conflict list is its own read view: GET /api/conflicts.
         var conflicts = ConflictDetector.Detect(bookings);
         var codesByBookingId = MapConflictCodesByBooking(conflicts);
 
@@ -56,7 +58,6 @@ public sealed class ScheduleService : IScheduleService
             Date = date,
             IsMonday = date.DayOfWeek == DayOfWeek.Monday,
             Rooms = roomSchedules,
-            Conflicts = conflicts.ToList(),
             Changes = cutoffMoves
                 .OrderBy(lessonEvent => lessonEvent.OccurredAt)
                 .Select(LessonMapper.ToDto)
