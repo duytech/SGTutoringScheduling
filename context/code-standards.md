@@ -9,6 +9,8 @@ them for all code in this repo.
 ## Naming
 - Spell names out in full, no abbreviations.
 - No single-character names, loop indices included.
+- Names in your code should tell you what they do.
+- Avoid Magic Numbers and Strings.
 - Keep a blank line between a closing brace and the statement that follows it (so an early `return` after a guard block stands apart).
 
 ## API design
