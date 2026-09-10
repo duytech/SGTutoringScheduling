@@ -156,9 +156,11 @@ required to accept.
   `from` = `to` for one day, which is how the board fills its banner).
 
 The board (the React app under `frontend/`) calls `GET /api/schedule`,
-`GET /api/tutors/loads` and `GET /api/conflicts` (single day). `move` and
-`history` are API-only — no UI reaches them; the board stays a read-only proof
-of the move feature.
+`GET /api/tutors/loads` and `GET /api/conflicts` (single day). Each call lives in
+the component that consumes it — `Banner` fetches conflicts, `Loads` fetches
+tutor loads, `App` only the schedule — so one endpoint failing degrades just that
+view instead of blanking the board. `move` and `history` are API-only — no UI
+reaches them; the board stays a read-only proof of the move feature.
 
 An earlier throwaway static board (`Api/wwwroot/index.html`, one hand-written
 HTML file) was removed once the React app covered the same views. The `Api`
