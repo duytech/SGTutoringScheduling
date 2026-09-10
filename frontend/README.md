@@ -39,7 +39,7 @@ with any static host).
 ## Structure
 
 - `src/api/` — DTO types (`types.ts`) and the read fetches (`schedule.ts`,
-  `tutors.ts`)
+  `tutors.ts`, `conflicts.ts`)
 - `src/lib/format.ts` — `formatTime()` helper (`"HH:mm:ss"` -> `"HH:mm"`)
 - `src/components/` — one component per board section: `App`, `Banner`,
   `Changes`, `Loads`, `Rooms`, `Lesson`
