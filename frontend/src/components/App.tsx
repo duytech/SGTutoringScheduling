@@ -17,6 +17,7 @@ export function App() {
   const [status, setStatus] = useState("");
 
   useEffect(() => {
+    // Cancelled guard is a pattern to handle race condition
     let cancelled = false;
     setLoading(true);
 
@@ -38,6 +39,7 @@ export function App() {
         setStatus("failed to load");
       });
 
+    // cleanup: run when date change or unmount
     return () => {
       cancelled = true;
     };
