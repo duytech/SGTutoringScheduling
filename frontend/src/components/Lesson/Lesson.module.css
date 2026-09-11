@@ -1,0 +1,19 @@
+.lesson { padding: 8px 12px; border-bottom: 1px solid #eee; }
+.lesson:last-child { border-bottom: 0; }
+.lesson.clash { background: var(--error-bg); border-left: 3px solid var(--error); }
+.lesson.movedLate { border-left: 3px solid var(--warn); }
+.lesson .time { font-variant-numeric: tabular-nums; font-weight: 600; }
+.lesson .who { font-size: 13px; }
+.lesson .badges { margin-top: 3px; }
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--error);
+  color: #fff;
+  margin-right: 4px;
+}
+.badge.pair { background: #45505f; }
+.badge.cancelled { background: #999; }
+.badge.moved { background: #8a5a00; }
