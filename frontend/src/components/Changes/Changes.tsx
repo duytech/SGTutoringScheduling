@@ -1,11 +1,12 @@
-import type { LessonEvent } from "../api/types";
-import { formatTime } from "../lib/format";
+import type { LessonEvent } from "../../api/types";
+import { formatTime } from "../../lib/format";
+import styles from "./Changes.module.css";
 
 export function Changes({ events, day }: { events: LessonEvent[]; day: string }) {
   if (!events || !events.length) return null;
 
   return (
-    <div id="changes">
+    <div className={styles.changes}>
       <h2>Changes since 16:00 the day before — tell the tutors</h2>
       {events.map((event, index) => {
         const from = `${event.fromDate === day ? "" : event.fromDate + " "}${formatTime(event.fromStartTime)} ${event.fromRoomId}`;
@@ -16,10 +17,10 @@ export function Changes({ events, day }: { events: LessonEvent[]; day: string })
         else detail = `moved off this day to ${to.trim()}`;
 
         return (
-          <div className="change" key={index}>
+          <div className={styles.change} key={index}>
             <strong>{event.lessonId}</strong> {detail}
             {event.reason ? ` — ${event.reason}` : ""}
-            <div className="when">recorded {event.occurredAt.replace("T", " ").slice(0, 16)}</div>
+            <div className={styles.when}>recorded {event.occurredAt.replace("T", " ").slice(0, 16)}</div>
           </div>
         );
       })}

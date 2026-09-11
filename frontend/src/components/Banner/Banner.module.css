@@ -1,0 +1,19 @@
+.banner { margin-bottom: 20px; }
+.conflict {
+  border-left: 4px solid var(--error);
+  background: var(--error-bg);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 3px;
+}
+.conflict.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+}
+.conflict .tag {
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .03em;
+}
+.conflict .ids { color: var(--muted); font-size: 13px; }
+.ok { color: #1a7f37; }

@@ -1,0 +1,15 @@
+:root {
+  --error: #b3261e;
+  --error-bg: #fceceb;
+  --warn: #8a5a00;
+  --warn-bg: #fdf3e2;
+  --line: #d9d9d9;
+  --muted: #666;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 15px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #1b1b1b;
+  background: #fafafa;
+}

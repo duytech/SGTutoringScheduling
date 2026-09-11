@@ -1,0 +1,11 @@
+.changes { margin-bottom: 20px; }
+.changes h2 { font-size: 14px; margin: 0 0 6px; }
+.change {
+  border-left: 4px solid var(--warn);
+  background: var(--warn-bg);
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+.change .when { color: var(--muted); font-size: 12px; }

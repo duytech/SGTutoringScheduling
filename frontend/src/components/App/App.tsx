@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import type { Conflict, ScheduleDayResponse, TutorLoad } from "../api/types";
-import { fetchSchedule, PINNED_TODAY } from "../api/schedule";
-import { fetchTutorLoads } from "../api/tutors";
-import { fetchConflicts } from "../api/conflicts";
-import { Banner } from "./Banner";
-import { Changes } from "./Changes";
-import { Loads } from "./Loads";
-import { Rooms } from "./Rooms";
+import type { Conflict, ScheduleDayResponse, TutorLoad } from "../../api/types";
+import { fetchSchedule, PINNED_TODAY } from "../../api/schedule";
+import { fetchTutorLoads } from "../../api/tutors";
+import { fetchConflicts } from "../../api/conflicts";
+import { Banner } from "../Banner";
+import { Changes } from "../Changes";
+import { Loads } from "../Loads";
+import { Rooms } from "../Rooms";
+import styles from "./App.module.css";
 
 export function App() {
   const [date, setDate] = useState(PINNED_TODAY);
@@ -17,6 +18,7 @@ export function App() {
   const [status, setStatus] = useState("");
 
   useEffect(() => {
+    // Cancelled guard is a pattern to handle race condition
     let cancelled = false;
     setLoading(true);
 
@@ -38,6 +40,7 @@ export function App() {
         setStatus("failed to load");
       });
 
+    // cleanup: run when date change or unmount
     return () => {
       cancelled = true;
     };
@@ -45,21 +48,21 @@ export function App() {
 
   return (
     <>
-      <header>
+      <header className={styles.header}>
         <h1>Bright Path Learning Centre</h1>
-        <span className="muted">Room board for</span>
+        <span className={styles.muted}>Room board for</span>
         <input
           type="date"
           value={date}
           disabled={loading}
           onChange={(event) => setDate(event.target.value || PINNED_TODAY)}
         />
-        <span className="muted">{status}</span>
+        <span className={styles.muted}>{status}</span>
       </header>
-      <main aria-busy={loading}>
+      <main className={styles.main} aria-busy={loading}>
         {loading && (
-          <div className="loading-overlay">
-            <div className="spinner" />
+          <div className={styles.loadingOverlay}>
+            <div className={styles.spinner} />
           </div>
         )}
         {data && (
