@@ -10,6 +10,17 @@
 .header h1 { font-size: 18px; margin: 0; }
 .muted { color: var(--muted); }
 .header input:disabled { cursor: wait; }
+.navButton {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+.navButton:disabled {
+  cursor: wait;
+  color: var(--muted);
+}
 .main { padding: 20px; max-width: 1100px; margin: 0 auto; position: relative; min-height: 300px; }
 
 .loadingOverlay {
