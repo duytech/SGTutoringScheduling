@@ -9,6 +9,13 @@ import { Loads } from "../Loads";
 import { Rooms } from "../Rooms";
 import styles from "./App.module.css";
 
+function shiftDate(date: string, delta: number): string {
+  const shifted = new Date(`${date}T00:00:00Z`);
+  shifted.setUTCDate(shifted.getUTCDate() + delta);
+
+  return shifted.toISOString().slice(0, 10);
+}
+
 export function App() {
   const [date, setDate] = useState(PINNED_TODAY);
   const [data, setData] = useState<ScheduleDayResponse | null>(null);
@@ -51,12 +58,28 @@ export function App() {
       <header className={styles.header}>
         <h1>Bright Path Learning Centre</h1>
         <span className={styles.muted}>Room board for</span>
+        <button
+          type="button"
+          className={styles.navButton}
+          disabled={loading}
+          onClick={() => setDate((current) => shiftDate(current, -1))}
+        >
+          Back
+        </button>
         <input
           type="date"
           value={date}
           disabled={loading}
           onChange={(event) => setDate(event.target.value || PINNED_TODAY)}
         />
+        <button
+          type="button"
+          className={styles.navButton}
+          disabled={loading}
+          onClick={() => setDate((current) => shiftDate(current, 1))}
+        >
+          Next
+        </button>
         <span className={styles.muted}>{status}</span>
       </header>
       <main className={styles.main} aria-busy={loading}>
