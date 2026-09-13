@@ -22,6 +22,11 @@ never the real system clock. State which date is used in the README.
 Naming and API-design conventions live in `context/code-standards.md` — follow
 them for all code in this repo.
 
+## Frontend verification
+After changing anything under `frontend/src`, run `npm run lint` (eslint)
+from `frontend/` and fix any reported errors before considering the change
+done, in addition to testing the change in the browser.
+
 ## Rules from the brief (see brief-notes.md for full context/contradictions)
 - 6 rooms, one lesson per room at a time, a tutor in one room at a time.
 - No tutor gets more than 6 bookings/day — but the business itself already
