@@ -1,0 +1,13 @@
+.badges { margin-top: 3px; }
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--error);
+  color: #fff;
+  margin-right: 4px;
+}
+.badge.pair { background: #45505f; }
+.badge.cancelled { background: #999; }
+.badge.moved { background: #8a5a00; }
