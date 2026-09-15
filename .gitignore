@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Personal Claude Code notes, not shared with the team
+CLAUDE.local.md
+
 # Local SQLite database (recreated from seed data on startup)
 *.db
 *.db-shm
