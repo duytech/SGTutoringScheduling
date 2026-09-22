@@ -1,3 +1,4 @@
+using TutoringScheduling.Api.Extensions;
 using TutoringScheduling.Application;
 
 namespace TutoringScheduling.Api.Endpoints.Lessons;
@@ -11,11 +12,8 @@ public static class LessonHistoryEndpoint
             IScheduleService schedule,
             CancellationToken cancellationToken) =>
         {
-            var response = await schedule.GetLessonHistoryAsync(id, cancellationToken);
-
-            return response is null
-                ? Results.NotFound(new { error = $"Lesson '{id}' not found." })
-                : Results.Ok(response);
+            var result = await schedule.GetLessonHistoryAsync(id, cancellationToken);
+            return result.ToHttpResult();
         });
 
         return endpoints;

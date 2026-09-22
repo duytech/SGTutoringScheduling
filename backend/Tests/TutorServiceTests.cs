@@ -11,7 +11,7 @@ public class TutorServiceTests : SqlServerFixture
     [Fact]
     public async Task GetLoadsForDayAsync_WithNoBookings_ReturnsEmptyLoadsForThatDate()
     {
-        var loads = await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6));
+        var loads = (await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).Value!;
 
         Assert.Equal(new DateOnly(2026, 3, 6), loads.Date);
         Assert.Empty(loads.TutorLoads);
@@ -24,7 +24,7 @@ public class TutorServiceTests : SqlServerFixture
             BookingFactory.Create("A", start: "08:00", roomId: "R1"),
             BookingFactory.Create("B", start: "10:00", roomId: "R2"));
 
-        var load = Assert.Single((await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).TutorLoads);
+        var load = Assert.Single((await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).Value!.TutorLoads);
 
         Assert.Equal("T1", load.TutorId);
         Assert.Equal(2, load.LessonCount);
@@ -40,7 +40,7 @@ public class TutorServiceTests : SqlServerFixture
                 $"L{hour}", start: $"{7 + hour:00}:00", roomId: $"R{(hour % 6) + 1}"))
             .ToArray());
 
-        var load = Assert.Single((await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).TutorLoads);
+        var load = Assert.Single((await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).Value!.TutorLoads);
 
         Assert.Equal(7, load.LessonCount);
         Assert.True(load.OverLimit);
@@ -53,7 +53,7 @@ public class TutorServiceTests : SqlServerFixture
             BookingFactory.Create("A", start: "08:00", roomId: "R1"),
             BookingFactory.Create("B", start: "10:00", roomId: "R2", status: BookingStatus.Cancelled));
 
-        var load = Assert.Single((await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).TutorLoads);
+        var load = Assert.Single((await Service.GetLoadsForDayAsync(new DateOnly(2026, 3, 6))).Value!.TutorLoads);
 
         Assert.Equal(1, load.LessonCount);
     }

@@ -1,4 +1,5 @@
 using TutoringScheduling.Application.Abstractions;
+using TutoringScheduling.Application.Common;
 using TutoringScheduling.Application.Contracts;
 
 namespace TutoringScheduling.Application;
@@ -17,7 +18,7 @@ public sealed class ScheduleService : IScheduleService
         _events = events;
     }
 
-    public async Task<ScheduleDayResponse> GetDayAsync(
+    public async Task<Result<ScheduleDayResponse>> GetDayAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
     {
@@ -53,7 +54,7 @@ public sealed class ScheduleService : IScheduleService
             })
             .ToList();
 
-        return new ScheduleDayResponse
+        return Result.Success(new ScheduleDayResponse
         {
             IsMonday = date.DayOfWeek == DayOfWeek.Monday,
             Rooms = roomSchedules,
@@ -61,10 +62,10 @@ public sealed class ScheduleService : IScheduleService
                 .OrderBy(lessonEvent => lessonEvent.OccurredAt)
                 .Select(LessonMapper.ToDto)
                 .ToList(),
-        };
+        });
     }
 
-    public async Task<LessonHistoryResponse?> GetLessonHistoryAsync(
+    public async Task<Result<LessonHistoryResponse>> GetLessonHistoryAsync(
         string lessonId,
         CancellationToken cancellationToken = default)
     {
@@ -72,13 +73,14 @@ public sealed class ScheduleService : IScheduleService
 
         if (lesson is null)
         {
-            return null;
+            return Result.Failure<LessonHistoryResponse>(
+                Error.NotFound("lesson_not_found", $"Lesson '{lessonId}' not found."));
         }
 
         // SQLite cannot sort by DateTimeOffset, so order once materialised.
         var events = await _events.GetLessonEventsAsync(lessonId, cancellationToken);
 
-        return new LessonHistoryResponse
+        return Result.Success(new LessonHistoryResponse
         {
             Lesson = LessonMapper.ToDto(lesson),
             Events = events
@@ -86,10 +88,10 @@ public sealed class ScheduleService : IScheduleService
                 .ThenBy(lessonEvent => lessonEvent.Id)
                 .Select(LessonMapper.ToDto)
                 .ToList(),
-        };
+        });
     }
 
-    public async Task<ConflictsResponse> GetConflictsAsync(
+    public async Task<Result<ConflictsResponse>> GetConflictsAsync(
         DateOnly? from,
         DateOnly? to,
         CancellationToken cancellationToken = default)
@@ -97,7 +99,7 @@ public sealed class ScheduleService : IScheduleService
         var bookings = await _bookings.GetBookingsInRangeAsync(from, to, cancellationToken);
         var conflicts = ConflictDetector.Detect(bookings);
 
-        return new ConflictsResponse
+        return Result.Success(new ConflictsResponse
         {
             From = from,
             To = to,
@@ -107,7 +109,7 @@ public sealed class ScheduleService : IScheduleService
                 Warnings = conflicts.Count(c => c.Severity == ConflictSeverities.Warning),
             },
             Conflicts = conflicts.ToList(),
-        };
+        });
     }
 
     private static Dictionary<string, List<string>> MapConflictCodesByBooking(

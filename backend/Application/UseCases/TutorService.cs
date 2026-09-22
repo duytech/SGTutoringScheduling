@@ -1,4 +1,5 @@
 using TutoringScheduling.Application.Abstractions;
+using TutoringScheduling.Application.Common;
 using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Domain;
 
@@ -18,7 +19,7 @@ public sealed class TutorService : ITutorService
         _bookings = bookings;
     }
 
-    public async Task<TutorLoadsResponse> GetLoadsForDayAsync(
+    public async Task<Result<TutorLoadsResponse>> GetLoadsForDayAsync(
         DateOnly date,
         CancellationToken cancellationToken = default)
     {
@@ -38,10 +39,10 @@ public sealed class TutorService : ITutorService
             })
             .ToList();
 
-        return new TutorLoadsResponse
+        return Result.Success(new TutorLoadsResponse
         {
             Date = date,
             TutorLoads = tutorLoads,
-        };
+        });
     }
 }

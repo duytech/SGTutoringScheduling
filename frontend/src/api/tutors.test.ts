@@ -7,11 +7,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function stubFetch(responseInit: { ok: boolean; status?: number; body?: unknown }) {
+function stubFetch(responseInit: { ok: boolean; status?: number; data?: unknown; error?: { code: string; message: string } }) {
   const fetchMock = vi.fn().mockResolvedValue({
     ok: responseInit.ok,
     status: responseInit.status ?? 200,
-    json: () => Promise.resolve(responseInit.body),
+    json: () => Promise.resolve({ data: responseInit.data ?? null, error: responseInit.error ?? null }),
   });
 
   vi.stubGlobal("fetch", fetchMock);
@@ -21,7 +21,7 @@ function stubFetch(responseInit: { ok: boolean; status?: number; body?: unknown 
 
 describe("fetchTutorLoads", () => {
   test("requests the given date", async () => {
-    const fetchMock = stubFetch({ ok: true, body: { date: "2026-03-05", tutorLoads: [] } });
+    const fetchMock = stubFetch({ ok: true, data: { date: "2026-03-05", tutorLoads: [] } });
 
     await fetchTutorLoads("2026-03-05");
 
@@ -29,7 +29,7 @@ describe("fetchTutorLoads", () => {
   });
 
   test("falls back to the pinned today when no date is given", async () => {
-    const fetchMock = stubFetch({ ok: true, body: { date: PINNED_TODAY, tutorLoads: [] } });
+    const fetchMock = stubFetch({ ok: true, data: { date: PINNED_TODAY, tutorLoads: [] } });
 
     await fetchTutorLoads("");
 
@@ -38,14 +38,14 @@ describe("fetchTutorLoads", () => {
 
   test("resolves with the parsed response body", async () => {
     const body: TutorLoadsResponse = { date: "2026-03-05", tutorLoads: [] };
-    stubFetch({ ok: true, body });
+    stubFetch({ ok: true, data: body });
 
     await expect(fetchTutorLoads("2026-03-05")).resolves.toEqual(body);
   });
 
-  test("throws when the response is not ok", async () => {
-    stubFetch({ ok: false, status: 404 });
+  test("throws with the server's error message when the response is an error", async () => {
+    stubFetch({ ok: false, status: 404, error: { code: "tutor_loads_failure", message: "boom" } });
 
-    await expect(fetchTutorLoads("2026-03-05")).rejects.toThrow("tutor loads request failed: 404");
+    await expect(fetchTutorLoads("2026-03-05")).rejects.toThrow("boom");
   });
 });

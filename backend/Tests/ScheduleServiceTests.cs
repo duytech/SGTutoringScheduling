@@ -11,7 +11,7 @@ public class ScheduleServiceTests : SqlServerFixture
     [Fact]
     public async Task GetDayAsync_ReturnsEveryRoom_EvenWhenEmpty()
     {
-        var day = await Service.GetDayAsync(new DateOnly(2026, 3, 6));
+        var day = (await Service.GetDayAsync(new DateOnly(2026, 3, 6))).Value!;
 
         Assert.Equal(6, day.Rooms.Count);
         Assert.All(day.Rooms, room => Assert.Empty(room.Lessons));
@@ -26,7 +26,7 @@ public class ScheduleServiceTests : SqlServerFixture
             BookingFactory.Create("A", roomId: "R1", student: "Chau"),
             BookingFactory.Create("B", roomId: "R2", student: "Long"));
 
-        var day = await Service.GetDayAsync(new DateOnly(2026, 3, 6));
+        var day = (await Service.GetDayAsync(new DateOnly(2026, 3, 6))).Value!;
 
         var lessons = day.Rooms.SelectMany(room => room.Lessons).ToList();
         Assert.Equal(2, lessons.Count);
@@ -43,7 +43,7 @@ public class ScheduleServiceTests : SqlServerFixture
             "L1",
             new() { ToDate = new DateOnly(2026, 3, 6), ToStartTime = new TimeOnly(11, 0) });
 
-        var day = await Service.GetDayAsync(new DateOnly(2026, 3, 6));
+        var day = (await Service.GetDayAsync(new DateOnly(2026, 3, 6))).Value!;
 
         Assert.Single(day.Changes, change => change.LessonId == "L1");
         var lesson = day.Rooms.SelectMany(room => room.Lessons).Single();
@@ -56,8 +56,8 @@ public class ScheduleServiceTests : SqlServerFixture
         Add(BookingFactory.Create("M", date: "2026-03-09", start: "10:00"));
 
         Assert.Empty((await Service.GetConflictsAsync(
-            new DateOnly(2026, 3, 6), new DateOnly(2026, 3, 8))).Conflicts);
+            new DateOnly(2026, 3, 6), new DateOnly(2026, 3, 8))).Value!.Conflicts);
         Assert.Single((await Service.GetConflictsAsync(
-            new DateOnly(2026, 3, 9), new DateOnly(2026, 3, 9))).Conflicts);
+            new DateOnly(2026, 3, 9), new DateOnly(2026, 3, 9))).Value!.Conflicts);
     }
 }
