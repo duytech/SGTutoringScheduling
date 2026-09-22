@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TutoringScheduling.Application.Common;
 using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Domain;
 using TutoringScheduling.Application;
@@ -28,7 +29,7 @@ public class MoveLessonServiceTests : SqlServerFixture
 
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-10", "14:00", room: "R3", reason: "family request"));
 
-        Assert.Equal(MoveOutcome.Applied, result.Outcome);
+        Assert.True(result.IsSuccess);
 
         var lesson = await Db.Bookings.AsNoTracking().SingleAsync(b => b.Id == "L1");
         Assert.Equal(new TimeOnly(14, 0), lesson.StartTime);
@@ -52,8 +53,9 @@ public class MoveLessonServiceTests : SqlServerFixture
         // Moving L1 onto 15:00 collides with L2's tutor.
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-10", "15:00"));
 
-        Assert.Equal(MoveOutcome.Rejected, result.Outcome);
-        Assert.Contains(result.Conflicts, c => c.Code == ConflictCodes.TutorDoubleBooked);
+        Assert.False(result.IsSuccess);
+        var conflictError = Assert.IsType<MoveConflictError>(result.Error);
+        Assert.Contains(conflictError.Conflicts, c => c.Code == ConflictCodes.TutorDoubleBooked);
 
         var lesson = await Db.Bookings.AsNoTracking().SingleAsync(b => b.Id == "L1");
         Assert.Equal(new TimeOnly(9, 0), lesson.StartTime);
@@ -68,8 +70,8 @@ public class MoveLessonServiceTests : SqlServerFixture
         // "Now" is 2026-03-06 09:00; the cut-off for a 03-06 lesson was 03-05 16:00.
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-06", "11:00"));
 
-        Assert.Equal(MoveOutcome.Applied, result.Outcome);
-        Assert.True(result.Applied!.Event.AfterCutoff);
+        Assert.True(result.IsSuccess);
+        Assert.True(result.Value!.Event.AfterCutoff);
     }
 
     [Fact]
@@ -79,8 +81,8 @@ public class MoveLessonServiceTests : SqlServerFixture
 
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-10", "11:00"));
 
-        Assert.Equal(MoveOutcome.Applied, result.Outcome);
-        Assert.False(result.Applied!.Event.AfterCutoff);
+        Assert.True(result.IsSuccess);
+        Assert.False(result.Value!.Event.AfterCutoff);
     }
 
     [Fact]
@@ -90,7 +92,7 @@ public class MoveLessonServiceTests : SqlServerFixture
 
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-11", "09:00"));
 
-        Assert.Equal(MoveOutcome.Rejected, result.Outcome);
+        Assert.False(result.IsSuccess);
     }
 
     [Fact]
@@ -100,8 +102,8 @@ public class MoveLessonServiceTests : SqlServerFixture
 
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-11", "09:00"));
 
-        Assert.Equal(MoveOutcome.Rejected, result.Outcome);
-        Assert.Contains("pair", result.RejectionReason!, StringComparison.OrdinalIgnoreCase);
+        Assert.False(result.IsSuccess);
+        Assert.Contains("pair", result.Error!.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -111,7 +113,7 @@ public class MoveLessonServiceTests : SqlServerFixture
 
         var result = await ServiceAt().MoveAsync("L1", To("2026-03-09", "09:00"));
 
-        Assert.Equal(MoveOutcome.Rejected, result.Outcome);
+        Assert.False(result.IsSuccess);
     }
 
     [Fact]
@@ -119,7 +121,8 @@ public class MoveLessonServiceTests : SqlServerFixture
     {
         var result = await ServiceAt().MoveAsync("nope", To("2026-03-10", "09:00"));
 
-        Assert.Equal(MoveOutcome.LessonNotFound, result.Outcome);
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.NotFound, result.Error!.Type);
     }
 
     [Fact]
@@ -138,8 +141,8 @@ public class MoveLessonServiceTests : SqlServerFixture
             moverA.MoveAsync("L1", target),
             moverB.MoveAsync("L2", target));
 
-        Assert.Single(results, r => r.Outcome == MoveOutcome.Applied);
-        Assert.Single(results, r => r.Outcome == MoveOutcome.Rejected);
+        Assert.Single(results, r => r.IsSuccess);
+        Assert.Single(results, r => !r.IsSuccess);
 
         var bookedIntoSlot = await Db.Bookings.AsNoTracking()
             .Where(b => b.LessonDate == DateOnly.Parse("2026-03-11")

@@ -1,5 +1,5 @@
+using TutoringScheduling.Application.Common;
 using TutoringScheduling.Domain;
-using TutoringScheduling.Application;
 using TutoringScheduling.Tests.Support;
 
 namespace TutoringScheduling.Tests;
@@ -22,16 +22,20 @@ public class LessonHistoryTests : SqlServerFixture
         await NewMover(new FixedClock("2026-03-06T09:00:00"))
             .MoveAsync("L1", new() { ToDate = new DateOnly(2026, 3, 10), ToStartTime = new TimeOnly(11, 0) });
 
-        var history = await NewScheduleService().GetLessonHistoryAsync("L1");
+        var result = await NewScheduleService().GetLessonHistoryAsync("L1");
 
-        Assert.NotNull(history);
-        Assert.Equal(new[] { "Created", "Moved" }, history!.Events.Select(e => e.Type));
+        Assert.True(result.IsSuccess);
+        var history = result.Value!;
+        Assert.Equal(new[] { "Created", "Moved" }, history.Events.Select(e => e.Type));
         Assert.Equal(new TimeOnly(11, 0), history.Lesson.StartTime);
     }
 
     [Fact]
-    public async Task History_ForAnUnknownLesson_IsNull()
+    public async Task History_ForAnUnknownLesson_IsNotFound()
     {
-        Assert.Null(await NewScheduleService().GetLessonHistoryAsync("nope"));
+        var result = await NewScheduleService().GetLessonHistoryAsync("nope");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(ErrorType.NotFound, result.Error!.Type);
     }
 }
