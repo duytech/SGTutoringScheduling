@@ -30,14 +30,16 @@ public sealed class MoveLessonService : IMoveLessonService
     private readonly IRoomStore _rooms;
     private readonly IMoveRecorder _moves;
     private readonly IClock _clock;
+    private readonly IUnitOfWork _unitOfWork;
 
     public MoveLessonService(
-        IBookingStore bookings, IRoomStore rooms, IMoveRecorder moves, IClock clock)
+        IBookingStore bookings, IRoomStore rooms, IMoveRecorder moves, IClock clock, IUnitOfWork unitOfWork)
     {
         _bookings = bookings;
         _rooms = rooms;
         _moves = moves;
         _clock = clock;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<MoveResult> MoveAsync(
@@ -88,52 +90,65 @@ public sealed class MoveLessonService : IMoveLessonService
             return MoveResult.Reject($"Room '{toRoomId}' does not exist.");
         }
 
-        var targetDay = (await _bookings.GetBookingsForDayAsync(request.ToDate, cancellationToken))
-            .Where(booking => booking.Id != lessonId)
-            .ToList();
+        // A Serializable transaction spans the read-check-write sequence below so
+        // two concurrent moves into the same free room+slot cannot both pass the
+        // conflict check and both commit (see PLAN-move-lesson-concurrency.md).
+        await using var transaction = await _unitOfWork.BeginSerializableTransactionAsync(cancellationToken);
 
-        var proposed = CloneInto(lesson, request.ToDate, request.ToStartTime, toRoomId);
-        targetDay.Add(proposed);
-
-        var conflicts = ConflictDetector.Detect(targetDay)
-            .Where(conflict => conflict.BookingIds.Contains(lessonId))
-            .ToList();
-
-        var blocking = conflicts.Where(c => c.Severity == ConflictSeverities.Error).ToList();
-        if (blocking.Count > 0)
+        try
         {
-            return MoveResult.Reject("The move would clash with another lesson.", blocking);
+            var targetDay = (await _bookings.GetBookingsForDayAsync(request.ToDate, cancellationToken))
+                .Where(booking => booking.Id != lessonId)
+                .ToList();
+
+            var proposed = CloneInto(lesson, request.ToDate, request.ToStartTime, toRoomId);
+            targetDay.Add(proposed);
+
+            var conflicts = ConflictDetector.Detect(targetDay)
+                .Where(conflict => conflict.BookingIds.Contains(lessonId))
+                .ToList();
+
+            var blocking = conflicts.Where(c => c.Severity == ConflictSeverities.Error).ToList();
+            if (blocking.Count > 0)
+            {
+                return MoveResult.Reject("The move would clash with another lesson.", blocking);
+            }
+
+            var from = (lesson.LessonDate, lesson.StartTime, lesson.RoomId);
+
+            lesson.LessonDate = request.ToDate;
+            lesson.StartTime = request.ToStartTime;
+            lesson.RoomId = toRoomId;
+
+            var lessonEvent = new LessonEvent
+            {
+                LessonId = lessonId,
+                Type = LessonEventType.Moved,
+                OccurredAt = _clock.Now,
+                FromDate = from.LessonDate,
+                FromStartTime = from.StartTime,
+                FromRoomId = from.RoomId,
+                ToDate = request.ToDate,
+                ToStartTime = request.ToStartTime,
+                ToRoomId = toRoomId,
+                Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason.Trim(),
+                AfterCutoff = _clock.Now > CentreCalendar.ChangeCutoff(from.LessonDate),
+            };
+
+            await _moves.RecordMoveAsync(lesson, lessonEvent, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return MoveResult.Ok(new MoveLessonResponse
+            {
+                Lesson = LessonMapper.ToDto(lesson),
+                Event = LessonMapper.ToDto(lessonEvent),
+                Warnings = conflicts.Where(c => c.Severity == ConflictSeverities.Warning).ToList(),
+            });
         }
-
-        var from = (lesson.LessonDate, lesson.StartTime, lesson.RoomId);
-
-        lesson.LessonDate = request.ToDate;
-        lesson.StartTime = request.ToStartTime;
-        lesson.RoomId = toRoomId;
-
-        var lessonEvent = new LessonEvent
+        catch (ConcurrentWriteConflictException)
         {
-            LessonId = lessonId,
-            Type = LessonEventType.Moved,
-            OccurredAt = _clock.Now,
-            FromDate = from.LessonDate,
-            FromStartTime = from.StartTime,
-            FromRoomId = from.RoomId,
-            ToDate = request.ToDate,
-            ToStartTime = request.ToStartTime,
-            ToRoomId = toRoomId,
-            Reason = string.IsNullOrWhiteSpace(request.Reason) ? null : request.Reason.Trim(),
-            AfterCutoff = _clock.Now > CentreCalendar.ChangeCutoff(from.LessonDate),
-        };
-
-        await _moves.RecordMoveAsync(lesson, lessonEvent, cancellationToken);
-
-        return MoveResult.Ok(new MoveLessonResponse
-        {
-            Lesson = LessonMapper.ToDto(lesson),
-            Event = LessonMapper.ToDto(lessonEvent),
-            Warnings = conflicts.Where(c => c.Severity == ConflictSeverities.Warning).ToList(),
-        });
+            return MoveResult.Reject("The slot was taken by another request at the same time; please retry.");
+        }
     }
 
     private static Booking CloneInto(Booking source, DateOnly date, TimeOnly start, string roomId)
