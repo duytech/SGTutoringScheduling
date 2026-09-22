@@ -21,6 +21,6 @@ public sealed class MoveRecorder : IMoveRecorder
     {
         _db.Bookings.Update(movedLesson);
         _db.LessonEvents.Add(moveEvent);
-        return SqlSerializationFailure.TranslateAsync(() => _db.SaveChangesAsync(cancellationToken));
+        return SqlErrorTranslator.TranslateAsync(() => _db.SaveChangesAsync(cancellationToken));
     }
 }

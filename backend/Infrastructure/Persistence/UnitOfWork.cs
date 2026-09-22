@@ -35,7 +35,7 @@ public sealed class UnitOfWork : IUnitOfWork
         }
 
         public Task CommitAsync(CancellationToken cancellationToken = default) =>
-            SqlSerializationFailure.TranslateAsync(() => _transaction.CommitAsync(cancellationToken));
+            SqlErrorTranslator.TranslateAsync(() => _transaction.CommitAsync(cancellationToken));
 
         public ValueTask DisposeAsync() => _transaction.DisposeAsync();
     }
