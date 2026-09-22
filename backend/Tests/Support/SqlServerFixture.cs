@@ -19,8 +19,9 @@ public abstract class SqlServerFixture : IDisposable
 
     protected SqlServerFixture()
     {
+        ConnectionString = $"{ServerConnectionString};Database={_databaseName}";
         Db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlServer($"{ServerConnectionString};Database={_databaseName}")
+            .UseSqlServer(ConnectionString)
             .Options);
         Db.Database.EnsureDeleted();
         Db.Database.EnsureCreated();
@@ -36,6 +37,8 @@ public abstract class SqlServerFixture : IDisposable
 
     protected AppDbContext Db { get; }
 
+    protected string ConnectionString { get; }
+
     /// <summary>A read-side <see cref="IScheduleService"/> backed by this fixture's database.</summary>
     protected IScheduleService NewScheduleService() =>
         new ScheduleService(new BookingStore(Db), new RoomStore(Db), new LessonEventStore(Db));
@@ -45,7 +48,23 @@ public abstract class SqlServerFixture : IDisposable
 
     /// <summary>An <see cref="IMoveLessonService"/> backed by this fixture's database.</summary>
     protected IMoveLessonService NewMover(IClock clock) =>
-        new MoveLessonService(new BookingStore(Db), new RoomStore(Db), new MoveRecorder(Db), clock);
+        new MoveLessonService(
+            new BookingStore(Db), new RoomStore(Db), new MoveRecorder(Db), clock, new UnitOfWork(Db));
+
+    /// <summary>
+    /// An <see cref="IMoveLessonService"/> backed by its own <see cref="AppDbContext"/>
+    /// against this fixture's database — needed to run two movers concurrently, since a
+    /// single <see cref="AppDbContext"/>/connection cannot run two transactions at once.
+    /// </summary>
+    protected IMoveLessonService NewMoverOnOwnConnection(IClock clock)
+    {
+        var db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlServer(ConnectionString)
+            .Options);
+
+        return new MoveLessonService(
+            new BookingStore(db), new RoomStore(db), new MoveRecorder(db), clock, new UnitOfWork(db));
+    }
 
     protected void Add(params Booking[] bookings)
     {

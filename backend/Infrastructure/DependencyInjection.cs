@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IRoomStore, RoomStore>();
         services.AddScoped<ILessonEventStore, LessonEventStore>();
         services.AddScoped<IMoveRecorder, MoveRecorder>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

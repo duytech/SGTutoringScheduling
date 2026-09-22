@@ -16,11 +16,11 @@ public sealed class MoveRecorder : IMoveRecorder
         _db = db;
     }
 
-    public async Task RecordMoveAsync(
+    public Task RecordMoveAsync(
         Booking movedLesson, LessonEvent moveEvent, CancellationToken cancellationToken = default)
     {
         _db.Bookings.Update(movedLesson);
         _db.LessonEvents.Add(moveEvent);
-        await _db.SaveChangesAsync(cancellationToken);
+        return SqlSerializationFailure.TranslateAsync(() => _db.SaveChangesAsync(cancellationToken));
     }
 }

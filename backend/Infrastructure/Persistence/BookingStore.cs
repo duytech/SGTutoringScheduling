@@ -27,10 +27,10 @@ public sealed class BookingStore : IBookingStore
     public async Task<IReadOnlyList<Booking>> GetBookingsForDayAsync(
         DateOnly date, CancellationToken cancellationToken = default)
     {
-        return await _db.Bookings
+        return await SqlSerializationFailure.TranslateAsync(() => _db.Bookings
             .Include(booking => booking.Tutor)
             .Where(booking => booking.LessonDate == date)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken));
     }
 
     public async Task<IReadOnlyList<Booking>> GetBookingsInRangeAsync(
