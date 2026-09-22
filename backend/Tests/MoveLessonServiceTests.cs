@@ -121,4 +121,31 @@ public class MoveLessonServiceTests : SqlServerFixture
 
         Assert.Equal(MoveOutcome.LessonNotFound, result.Outcome);
     }
+
+    [Fact]
+    public async Task Move_TwoConcurrentMovesIntoTheSameFreeSlot_OnlyOneSucceeds()
+    {
+        Add(
+            BookingFactory.Create("L1", date: "2026-03-10", start: "09:00", roomId: "R1", tutorId: "T1", student: "Chau"),
+            BookingFactory.Create("L2", date: "2026-03-10", start: "10:00", roomId: "R2", tutorId: "T2", student: "Long"));
+
+        var clock = new FixedClock("2026-03-06T09:00:00");
+        var moverA = NewMoverOnOwnConnection(clock);
+        var moverB = NewMoverOnOwnConnection(clock);
+        var target = To("2026-03-11", "13:00", room: "R5");
+
+        var results = await Task.WhenAll(
+            moverA.MoveAsync("L1", target),
+            moverB.MoveAsync("L2", target));
+
+        Assert.Single(results, r => r.Outcome == MoveOutcome.Applied);
+        Assert.Single(results, r => r.Outcome == MoveOutcome.Rejected);
+
+        var bookedIntoSlot = await Db.Bookings.AsNoTracking()
+            .Where(b => b.LessonDate == DateOnly.Parse("2026-03-11")
+                && b.StartTime == TimeOnly.Parse("13:00")
+                && b.RoomId == "R5")
+            .ToListAsync();
+        Assert.Single(bookedIntoSlot);
+    }
 }
