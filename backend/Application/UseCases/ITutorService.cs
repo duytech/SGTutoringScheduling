@@ -1,3 +1,4 @@
+using TutoringScheduling.Application.Common;
 using TutoringScheduling.Application.Contracts;
 
 namespace TutoringScheduling.Application;
@@ -8,6 +9,6 @@ namespace TutoringScheduling.Application;
 /// </summary>
 public interface ITutorService
 {
-    Task<TutorLoadsResponse> GetLoadsForDayAsync(
+    Task<Result<TutorLoadsResponse>> GetLoadsForDayAsync(
         DateOnly date, CancellationToken cancellationToken = default);
 }
