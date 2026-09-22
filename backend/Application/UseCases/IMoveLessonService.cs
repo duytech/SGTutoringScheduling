@@ -1,3 +1,4 @@
+using TutoringScheduling.Application.Common;
 using TutoringScheduling.Application.Contracts;
 
 namespace TutoringScheduling.Application;
@@ -9,6 +10,6 @@ namespace TutoringScheduling.Application;
 /// </summary>
 public interface IMoveLessonService
 {
-    Task<MoveResult> MoveAsync(
+    Task<Result<MoveLessonResponse>> MoveAsync(
         string lessonId, MoveLessonRequest request, CancellationToken cancellationToken = default);
 }
