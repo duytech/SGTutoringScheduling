@@ -1,3 +1,4 @@
+using TutoringScheduling.Api.Extensions;
 using TutoringScheduling.Application;
 
 namespace TutoringScheduling.Api.Endpoints.Schedule;
@@ -11,8 +12,8 @@ public static class ScheduleEndpoint
             IScheduleService schedule,
             CancellationToken cancellationToken) =>
         {
-            var response = await schedule.GetDayAsync(date, cancellationToken);
-            return Results.Ok(response);
+            var result = await schedule.GetDayAsync(date, cancellationToken);
+            return result.ToHttpResult();
         });
 
         return endpoints;

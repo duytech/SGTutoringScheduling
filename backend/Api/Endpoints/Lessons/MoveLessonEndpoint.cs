@@ -1,3 +1,5 @@
+using TutoringScheduling.Api.Contracts;
+using TutoringScheduling.Api.Extensions;
 using TutoringScheduling.Application;
 using TutoringScheduling.Application.Contracts;
 
@@ -15,19 +17,21 @@ public static class MoveLessonEndpoint
         {
             var result = await service.MoveAsync(id, request, cancellationToken);
 
-            return result.Outcome switch
+            // Every other outcome fits the shared envelope; a blocking clash carries
+            // its conflicts too (mirrors the old MoveRejectedResponse contract), so it
+            // gets its own shape rather than growing the shared ApiError.
+            if (result.Error is MoveConflictError conflictError)
             {
-                MoveOutcome.Applied => Results.Ok(result.Applied),
-                MoveOutcome.LessonNotFound => Results.NotFound(new { error = $"Lesson '{id}' not found." }),
-                MoveOutcome.Rejected => Results.Json(
-                    new MoveRejectedResponse
+                return Results.Json(
+                    new
                     {
-                        Reason = result.RejectionReason!,
-                        Conflicts = result.Conflicts.ToList(),
+                        data = (MoveLessonResponse?)null,
+                        error = new ApiConflictError(conflictError.Code, conflictError.Message, conflictError.Conflicts),
                     },
-                    statusCode: StatusCodes.Status409Conflict),
-                _ => Results.Problem("Unexpected move outcome."),
-            };
+                    statusCode: StatusCodes.Status409Conflict);
+            }
+
+            return result.ToHttpResult();
         });
 
         return endpoints;
