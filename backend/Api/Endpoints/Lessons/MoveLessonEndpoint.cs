@@ -19,16 +19,15 @@ public static class MoveLessonEndpoint
 
             // Every other outcome fits the shared envelope; a blocking clash carries
             // its conflicts too (mirrors the old MoveRejectedResponse contract), so it
-            // gets its own shape rather than growing the shared ApiError.
+            // gets its own shape rather than growing the shared ApiError. Status is
+            // still 200 — the client tells this apart from success via error.code.
             if (result.Error is MoveConflictError conflictError)
             {
-                return Results.Json(
-                    new
-                    {
-                        data = (MoveLessonResponse?)null,
-                        error = new ApiConflictError(conflictError.Code, conflictError.Message, conflictError.Conflicts),
-                    },
-                    statusCode: StatusCodes.Status409Conflict);
+                return Results.Ok(new
+                {
+                    data = (MoveLessonResponse?)null,
+                    error = new ApiConflictError(conflictError.Code, conflictError.Message, conflictError.Conflicts),
+                });
             }
 
             return result.ToHttpResult();

@@ -5,6 +5,8 @@ namespace TutoringScheduling.Api.Extensions;
 
 /// <summary>
 /// Maps a use case's <see cref="Result{T}"/> onto the shared HTTP envelope.
+/// Always HTTP 200 — success or failure is signaled by <c>error.code</c> in
+/// the body, not by status code, so the client has one thing to branch on.
 /// Endpoints whose failures need extra shape (e.g. move-lesson's conflicts)
 /// map themselves instead of using this.
 /// </summary>
@@ -18,14 +20,6 @@ public static class ResultExtensions
         }
 
         var error = result.Error!;
-        var envelope = ApiResponse<T>.Fail(new ApiError(error.Code, error.Message));
-
-        return error.Type switch
-        {
-            ErrorType.NotFound => Results.Json(envelope, statusCode: StatusCodes.Status404NotFound),
-            ErrorType.Validation => Results.Json(envelope, statusCode: StatusCodes.Status400BadRequest),
-            ErrorType.Conflict => Results.Json(envelope, statusCode: StatusCodes.Status409Conflict),
-            _ => Results.Json(envelope, statusCode: StatusCodes.Status500InternalServerError),
-        };
+        return Results.Ok(ApiResponse<T>.Fail(new ApiError(error.Code, error.Message)));
     }
 }
