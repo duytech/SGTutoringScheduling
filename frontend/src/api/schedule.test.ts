@@ -6,11 +6,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function stubFetch(responseInit: { ok: boolean; status?: number; body?: unknown }) {
+function stubFetch(responseInit: { ok: boolean; status?: number; data?: unknown; error?: { code: string; message: string } }) {
   const fetchMock = vi.fn().mockResolvedValue({
     ok: responseInit.ok,
     status: responseInit.status ?? 200,
-    json: () => Promise.resolve(responseInit.body),
+    json: () => Promise.resolve({ data: responseInit.data ?? null, error: responseInit.error ?? null }),
   });
 
   vi.stubGlobal("fetch", fetchMock);
@@ -20,7 +20,7 @@ function stubFetch(responseInit: { ok: boolean; status?: number; body?: unknown 
 
 describe("fetchSchedule", () => {
   test("requests the given date", async () => {
-    const fetchMock = stubFetch({ ok: true, body: { rooms: [] } as unknown as ScheduleDayResponse });
+    const fetchMock = stubFetch({ ok: true, data: { rooms: [] } as unknown as ScheduleDayResponse });
 
     await fetchSchedule("2026-03-05");
 
@@ -28,7 +28,7 @@ describe("fetchSchedule", () => {
   });
 
   test("falls back to the pinned today when no date is given", async () => {
-    const fetchMock = stubFetch({ ok: true, body: { rooms: [] } as unknown as ScheduleDayResponse });
+    const fetchMock = stubFetch({ ok: true, data: { rooms: [] } as unknown as ScheduleDayResponse });
 
     await fetchSchedule("");
 
@@ -37,14 +37,14 @@ describe("fetchSchedule", () => {
 
   test("resolves with the parsed response body", async () => {
     const body: ScheduleDayResponse = { isMonday: false, rooms: [], changes: [] };
-    stubFetch({ ok: true, body });
+    stubFetch({ ok: true, data: body });
 
     await expect(fetchSchedule("2026-03-05")).resolves.toEqual(body);
   });
 
-  test("throws when the response is not ok", async () => {
-    stubFetch({ ok: false, status: 500 });
+  test("throws with the server's error message when the response is an error", async () => {
+    stubFetch({ ok: false, status: 500, error: { code: "schedule_failure", message: "boom" } });
 
-    await expect(fetchSchedule("2026-03-05")).rejects.toThrow("schedule request failed: 500");
+    await expect(fetchSchedule("2026-03-05")).rejects.toThrow("boom");
   });
 });

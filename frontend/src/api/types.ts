@@ -1,6 +1,12 @@
 // Mirrors the server DTOs in Application/Contracts (System.Text.Json, camelCase).
 // DateOnly -> "2026-03-06", TimeOnly -> "09:00:00", DateTimeOffset -> ISO-8601 with offset.
 
+// Shared success/error envelope every endpoint responds with (Api/Contracts/ApiResponse.cs).
+export interface ApiEnvelope<T> {
+  data: T | null;
+  error: { code: string; message: string } | null;
+}
+
 export type LessonStatus = "Booked" | "Cancelled" | "NoShow";
 export type ConflictSeverity = "error" | "warning";
 
