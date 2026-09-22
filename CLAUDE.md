@@ -41,9 +41,9 @@ done, in addition to testing the change in the browser.
   silent overwrites of what a tutor was already told.
 
 ## Don't
-- Don't commit or push directly to `main`. Always cut a feature branch,
-  push it, and open a PR — even for small changes. Sync `main` only by
-  pulling after the PR merges.
+- Don't commit or push directly to `main`. Always cut a feature branch. Sync `main` only by
+  pulling after the PR merges. 
+- Don't automaticcaly commit code.
 
 ## Deliverables expected
 - `DECISIONS.md` at repo root (four sections: questions for the owner,
