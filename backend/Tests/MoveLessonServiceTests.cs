@@ -121,7 +121,7 @@ public class MoveLessonServiceTests : SqlServerFixture
         var result = await ServiceAt().MoveAsync("nope", To("2026-03-10", "09:00"));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal("lesson_not_found", result.Error!.Code);
+        Assert.Equal(ErrorCodes.LessonNotFound, result.Error!.Code);
     }
 
     [Fact]
