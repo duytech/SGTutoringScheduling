@@ -1,4 +1,3 @@
-using TutoringScheduling.Application.Common;
 using TutoringScheduling.Domain;
 using TutoringScheduling.Tests.Support;
 
@@ -36,6 +35,6 @@ public class LessonHistoryTests : SqlServerFixture
         var result = await NewScheduleService().GetLessonHistoryAsync("nope");
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(ErrorType.NotFound, result.Error!.Type);
+        Assert.Equal("lesson_not_found", result.Error!.Code);
     }
 }

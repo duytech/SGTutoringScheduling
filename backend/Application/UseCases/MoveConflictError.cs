@@ -10,4 +10,4 @@ namespace TutoringScheduling.Application;
 /// type having to know about conflicts.
 /// </summary>
 public sealed record MoveConflictError(string Message, IReadOnlyList<ConflictDto> Conflicts)
-    : Error("move_conflict", Message, ErrorType.Conflict);
+    : Error("move_conflict", Message);
