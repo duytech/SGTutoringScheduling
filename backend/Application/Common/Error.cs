@@ -6,13 +6,4 @@ namespace TutoringScheduling.Application.Common;
 /// can attach extra data to a specific failure (see <c>MoveConflictError</c>)
 /// while everything else rides on this shape.
 /// </summary>
-public record Error(string Code, string Message)
-{
-    public static Error Validation(string code, string message) => new(code, message);
-
-    public static Error NotFound(string code, string message) => new(code, message);
-
-    public static Error Conflict(string code, string message) => new(code, message);
-
-    public static Error Failure(string code, string message) => new(code, message);
-}
+public record Error(string Code, string Message);

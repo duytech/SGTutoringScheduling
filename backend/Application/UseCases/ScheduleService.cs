@@ -74,7 +74,7 @@ public sealed class ScheduleService : IScheduleService
         if (lesson is null)
         {
             return Result.Failure<LessonHistoryResponse>(
-                Error.NotFound("lesson_not_found", $"Lesson '{lessonId}' not found."));
+                new Error("lesson_not_found", $"Lesson '{lessonId}' not found."));
         }
 
         // SQLite cannot sort by DateTimeOffset, so order once materialised.
