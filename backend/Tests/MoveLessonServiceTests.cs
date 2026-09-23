@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using TutoringScheduling.Application.Common;
 using TutoringScheduling.Application.Contracts;
 using TutoringScheduling.Domain;
 using TutoringScheduling.Application;
@@ -122,7 +121,7 @@ public class MoveLessonServiceTests : SqlServerFixture
         var result = await ServiceAt().MoveAsync("nope", To("2026-03-10", "09:00"));
 
         Assert.False(result.IsSuccess);
-        Assert.Equal(ErrorType.NotFound, result.Error!.Type);
+        Assert.Equal(ErrorCodes.LessonNotFound, result.Error!.Code);
     }
 
     [Fact]

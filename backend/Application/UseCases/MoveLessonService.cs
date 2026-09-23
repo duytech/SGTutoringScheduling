@@ -32,7 +32,7 @@ public sealed class MoveLessonService : IMoveLessonService
         if (request.ToDate == default || request.ToStartTime == default)
         {
             return Result.Failure<MoveLessonResponse>(
-                Error.Validation("move_invalid_request", "toDate and toStartTime are required."));
+                new Error(ErrorCodes.MoveInvalidRequest, "toDate and toStartTime are required."));
         }
 
         var lesson = await _bookings.FindBookingAsync(lessonId, cancellationToken);
@@ -40,20 +40,20 @@ public sealed class MoveLessonService : IMoveLessonService
         if (lesson is null)
         {
             return Result.Failure<MoveLessonResponse>(
-                Error.NotFound("lesson_not_found", $"Lesson '{lessonId}' not found."));
+                new Error(ErrorCodes.LessonNotFound, $"Lesson '{lessonId}' not found."));
         }
 
         if (lesson.Status != BookingStatus.Booked)
         {
-            return Result.Failure<MoveLessonResponse>(Error.Validation(
-                "move_not_bookable",
+            return Result.Failure<MoveLessonResponse>(new Error(
+                ErrorCodes.MoveNotBookable,
                 $"Lesson {lessonId} is {lesson.Status.ToString().ToLowerInvariant()} and cannot be moved."));
         }
 
         if (lesson.GroupId is not null)
         {
-            return Result.Failure<MoveLessonResponse>(Error.Validation(
-                "move_paired_lesson",
+            return Result.Failure<MoveLessonResponse>(new Error(
+                ErrorCodes.MovePairedLesson,
                 $"Lesson {lessonId} is part of exam pair '{lesson.GroupId}'; the pair must be moved together (not supported)."));
         }
 
@@ -64,20 +64,20 @@ public sealed class MoveLessonService : IMoveLessonService
             && toRoomId == lesson.RoomId)
         {
             return Result.Failure<MoveLessonResponse>(
-                Error.Validation("move_no_change", "The lesson is already at that date, time and room."));
+                new Error(ErrorCodes.MoveNoChange, "The lesson is already at that date, time and room."));
         }
 
         if (CentreCalendar.IsClosed(request.ToDate))
         {
-            return Result.Failure<MoveLessonResponse>(Error.Validation(
-                "move_centre_closed",
+            return Result.Failure<MoveLessonResponse>(new Error(
+                ErrorCodes.MoveCentreClosed,
                 $"The centre is closed on {request.ToDate:dddd dd MMM}; pick another day."));
         }
 
         if (!await _rooms.RoomExistsAsync(toRoomId, cancellationToken))
         {
             return Result.Failure<MoveLessonResponse>(
-                Error.Validation("move_room_not_found", $"Room '{toRoomId}' does not exist."));
+                new Error(ErrorCodes.MoveRoomNotFound, $"Room '{toRoomId}' does not exist."));
         }
 
         // A Serializable transaction spans the read-check-write sequence below so
@@ -138,8 +138,8 @@ public sealed class MoveLessonService : IMoveLessonService
         }
         catch (ConcurrentWriteConflictException)
         {
-            return Result.Failure<MoveLessonResponse>(Error.Conflict(
-                "move_retry",
+            return Result.Failure<MoveLessonResponse>(new Error(
+                ErrorCodes.MoveRetry,
                 "The slot was taken by another request at the same time; please retry."));
         }
     }
