@@ -13,16 +13,18 @@ Clean Architecture solution (see [Layout](#layout)).
 
 ## Run it
 
-The .NET side lives under `backend/` (solution, projects, `seed-data/`); run the
-commands below from there.
+The solution file `TutoringScheduling.slnx` sits at the repo root; the .NET
+projects and `seed-data/` live under `backend/`. Run the commands below from the
+repo root. Opening the root folder in VS Code (C# Dev Kit) or Visual Studio loads
+the solution, including the React board (`frontend/frontend.esproj`); in Visual
+Studio pick the **Api + Frontend** startup profile to run both.
 
 Prerequisite: a local SQL Server instance reachable at `localhost` with Windows
 authentication (the connection string lives in `backend/Api/appsettings.json`
 under `ConnectionStrings:Default`).
 
 ```bash
-cd backend
-dotnet run --project Api
+dotnet run --project backend/Api
 ```
 
 On start the app applies migrations, creates the `TutoringScheduling` database,
@@ -50,7 +52,6 @@ and open http://localhost:5173 (Vite proxies `/api` to the API). See
 `frontend/README.md`.
 
 ```bash
-cd backend
 dotnet test
 ```
 
@@ -165,13 +166,15 @@ two warnings (tutor `T1` over limit on 2026-03-06, Monday lesson `L032`).
 
 ## Layout
 
-The .NET solution sits under `backend/`; `frontend/` and the docs stay at the
-repo root. Four projects, dependencies pointing inward only
+The solution file sits at the repo root; the .NET projects live under
+`backend/`, the React board under `frontend/`. Four projects, dependencies pointing inward only
 (`Api → Infrastructure → Application → Domain`):
 
 ```
+TutoringScheduling.slnx   solution (.NET projects + frontend.esproj)
+TutoringScheduling.slnLaunch  Visual Studio "Api + Frontend" startup profile
 backend/
-  TutoringScheduling.slnx, Directory.Build.props
+  Directory.Build.props
   seed-data/       lessons_export.csv, tutors.csv
   Domain/          entities, the centre calendar (UTC+7, 16:00 cut-off). No dependencies.
   Application/     use cases + API contracts. References Domain only.
@@ -189,6 +192,7 @@ backend/
   Tests/           xUnit; SqlServerFixture + FixedClock back the service tests;
                    ArchitectureTests enforces the dependency rule
 frontend/          React 18 + TS (Vite) room board; dev-proxies /api
+                   frontend.esproj lets Visual Studio show and run it
 ```
 
 The use-case layer never sees a `DbContext` — it goes through the persistence
@@ -196,8 +200,8 @@ ports (`IBookingStore`, `IRoomStore`, `ILessonEventStore`, `IMoveRecorder`),
 defined in `Application` and implemented in `Infrastructure`. `AddApplication()`
 and `AddInfrastructure(config)` wire each layer up in `Api/Program.cs`.
 
-EF Core migrations (from `backend/`, startup project is `Api`):
+EF Core migrations (from the repo root, startup project is `Api`):
 
 ```bash
-dotnet ef migrations add <Name> --project Infrastructure --startup-project Api
+dotnet ef migrations add <Name> --project backend/Infrastructure --startup-project backend/Api
 ```

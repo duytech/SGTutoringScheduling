@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Api + Frontend",
+    "Projects": [
+      {
+        "Path": "backend\Api\TutoringScheduling.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "frontend\frontend.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

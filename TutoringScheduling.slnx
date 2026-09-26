@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="backend/Tests/TutoringScheduling.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Frontend/">
+    <Project Path="frontend/frontend.esproj">
+      <Build Project="false" />
+    </Project>
+  </Folder>
+  <Project Path="backend/Domain/TutoringScheduling.Domain.csproj" />
+  <Project Path="backend/Application/TutoringScheduling.Application.csproj" />
+  <Project Path="backend/Infrastructure/TutoringScheduling.Infrastructure.csproj" />
+  <Project Path="backend/Api/TutoringScheduling.Api.csproj" />
+</Solution>

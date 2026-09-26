@@ -9,7 +9,7 @@ import typescriptEslint from "typescript-eslint";
 //   - `@stylistic/padding-line-between-statements`: a blank line above every
 //     `return` that is not the first statement in its block.
 export default typescriptEslint.config(
-  { ignores: ["dist", "node_modules", ".vite", "vite.config.js", "vite.config.d.ts"] },
+  { ignores: ["dist", "node_modules", "bin", "obj", ".vite", "vite.config.js", "vite.config.d.ts"] },
   js.configs.recommended,
   ...typescriptEslint.configs.recommended,
   {
